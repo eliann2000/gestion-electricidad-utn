@@ -4,8 +4,13 @@ require("dotenv").config();
 
 const app = express();
 
+// Middlewares (van primero)
 app.use(cors({ origin: "http://localhost:3000" }));
 app.use(express.json());
+
+// Rutas
+app.use("/api/productos", require("./routes/productos.routes"));
+app.use("/api/clientes", require("./routes/clientes.routes"));
 
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, message: "API funcionando" });

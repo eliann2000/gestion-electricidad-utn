@@ -1,14 +1,58 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Producto {
+  id          Int     @id @default(autoincrement())
+  nombre      String
+  marca       String?
+  categoria   String?
+  precio      Decimal @db.Decimal(10,2)
+  stock       Int     @default(0)
+  stockMinimo Int     @default(0)
+  activo      Boolean @default(true)
+
+  detalles    DetalleVenta[]
+}
+
+model Cliente {
+  id        Int     @id @default(autoincrement())
+  nombre    String
+  telefono  String?
+  email     String?
+  direccion String?
+  activo    Boolean @default(true)
+
+  ventas     Venta[]
+}
+
+model Venta {
+  id        Int      @id @default(autoincrement())
+  fecha     DateTime @default(now())
+  total     Decimal  @db.Decimal(10,2)
+
+  clienteId Int?
+  cliente   Cliente? @relation(fields: [clienteId], references: [id])
+
+  detalles  DetalleVenta[]
+}
+
+model DetalleVenta {
+  id            Int     @id @default(autoincrement())
+  ventaId       Int
+  productoId    Int
+  cantidad      Int
+  precioUnitario Decimal @db.Decimal(10,2)
+  subtotal      Decimal @db.Decimal(10,2)
+
+  venta    Venta    @relation(fields: [ventaId], references: [id])
+  producto Producto @relation(fields: [productoId], references: [id])
+
+  @@index([ventaId])
+  @@index([productoId])
 }
