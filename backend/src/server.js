@@ -11,6 +11,8 @@ app.use(express.json());
 // Rutas
 app.use("/api/productos", require("./routes/productos.routes"));
 app.use("/api/clientes", require("./routes/clientes.routes"));
+app.use("/api/ventas", require("./routes/ventas.routes"));
+app.use("/api/reportes", require("./routes/reportes.routes"));
 
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, message: "API funcionando" });
