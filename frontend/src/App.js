@@ -9,34 +9,33 @@ export default function App() {
   const [page, setPage] = useState("ventas");
 
   const navBtnClass = (key) =>
-    `btn ${page === key ? "btnActive" : ""}`;
+    `sidebarBtn ${page === key ? "sidebarBtnActive" : ""}`;
 
   return (
-    <div className="app">
-      <header className="header">
-        <div className="headerInner">
-          <div className="brand">
-            <h2>Sistema de gestión</h2>
-          </div>
-
-          <nav className="nav">
-            <button className={navBtnClass("productos")} onClick={() => setPage("productos")}>
-              Productos
-            </button>
-            <button className={navBtnClass("clientes")} onClick={() => setPage("clientes")}>
-              Clientes
-            </button>
-            <button className={navBtnClass("ventas")} onClick={() => setPage("ventas")}>
-              Nueva Venta
-            </button>
-            <button className={navBtnClass("stock")} onClick={() => setPage("stock")}>
-              Reportes
-            </button>
-          </nav>
+    <div className="layout">
+      <aside className="sidebar">
+        <div className="sidebarHeader">
+          <h2>⚡ Sistema</h2>
+          <small>Gestión eléctrica</small>
         </div>
-      </header>
 
-      <main className="main">
+        <nav className="sidebarNav">
+          <button className={navBtnClass("productos")} onClick={() => setPage("productos")}>
+            📦 Productos
+          </button>
+          <button className={navBtnClass("clientes")} onClick={() => setPage("clientes")}>
+            👥 Clientes
+          </button>
+          <button className={navBtnClass("ventas")} onClick={() => setPage("ventas")}>
+            💰 Nueva Venta
+          </button>
+          <button className={navBtnClass("stock")} onClick={() => setPage("stock")}>
+            📊 Reportes
+          </button>
+        </nav>
+      </aside>
+
+      <main className="content">
         {page === "productos" && <ProductosPage />}
         {page === "clientes" && <ClientesPage />}
         {page === "ventas" && <NuevaVentaPage />}
