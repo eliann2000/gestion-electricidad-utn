@@ -16,6 +16,11 @@ export default function NuevaVentaPage() {
   const [okMsg, setOkMsg] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // Edición por fila del carrito
+  const [editRowPid, setEditRowPid] = useState(null); // productoId de la fila que edito
+  const [editProductoId, setEditProductoId] = useState("");
+  const [editCantidad, setEditCantidad] = useState("1");
+
   async function cargarData() {
     setLoading(true);
     setError("");
@@ -49,14 +54,12 @@ export default function NuevaVentaPage() {
     const prod = productos.find((p) => p.id === pid);
     if (!prod) return setError("Producto no encontrado");
 
-    // Si ya existe en el carrito, sumamos cantidad
     const existente = items.find((it) => it.productoId === pid);
     const precio = Number(prod.precio);
 
     const nuevaCantidad = (existente?.cantidad ?? 0) + qty;
     const nuevoSubtotal = precio * nuevaCantidad;
 
-    // Validación simple de stock (front). Igual el backend valida también.
     if (nuevaCantidad > prod.stock) {
       return setError(`Stock insuficiente. Disponible: ${prod.stock}`);
     }
@@ -64,9 +67,7 @@ export default function NuevaVentaPage() {
     if (existente) {
       setItems((prev) =>
         prev.map((it) =>
-          it.productoId === pid
-            ? { ...it, cantidad: nuevaCantidad, subtotal: nuevoSubtotal }
-            : it
+          it.productoId === pid ? { ...it, cantidad: nuevaCantidad, subtotal: nuevoSubtotal } : it
         )
       );
     } else {
@@ -81,7 +82,82 @@ export default function NuevaVentaPage() {
   }
 
   function quitarItem(pid) {
+    if (editRowPid === pid) cancelarEdicion();
     setItems((prev) => prev.filter((it) => it.productoId !== pid));
+  }
+
+  function iniciarEdicion(it) {
+    setError("");
+    setOkMsg("");
+    setEditRowPid(it.productoId);
+    setEditProductoId(String(it.productoId));
+    setEditCantidad(String(it.cantidad));
+  }
+
+  function cancelarEdicion() {
+    setEditRowPid(null);
+    setEditProductoId("");
+    setEditCantidad("1");
+  }
+
+  function guardarEdicion() {
+    setError("");
+    setOkMsg("");
+
+    const oldPid = editRowPid;
+    const newPid = Number(editProductoId);
+    const newQty = Number(editCantidad);
+
+    if (!oldPid) return;
+    if (!newPid) return setError("Elegí un producto");
+    if (!Number.isFinite(newQty) || newQty <= 0) return setError("Cantidad inválida");
+
+    const prodNuevo = productos.find((p) => p.id === newPid);
+    if (!prodNuevo) return setError("Producto no encontrado");
+
+    if (newQty > prodNuevo.stock) {
+      return setError(`Stock insuficiente. Disponible: ${prodNuevo.stock}`);
+    }
+
+    // Si cambia a un producto que ya existe en carrito, vamos a fusionar
+    const existente = items.find((x) => x.productoId === newPid && x.productoId !== oldPid);
+    if (existente) {
+      const qtyFusion = existente.cantidad + newQty;
+      if (qtyFusion > prodNuevo.stock) {
+        return setError(`No se puede fusionar: stock insuficiente. Disponible: ${prodNuevo.stock}`);
+      }
+    }
+
+    const precioNuevo = Number(prodNuevo.precio);
+
+    setItems((prev) => {
+      const sinViejo = prev.filter((x) => x.productoId !== oldPid);
+
+      // Fusionar si ya existe
+      const yaEsta = sinViejo.find((x) => x.productoId === newPid);
+      if (yaEsta) {
+        const qtyFusion = yaEsta.cantidad + newQty;
+        return sinViejo.map((x) =>
+          x.productoId === newPid
+            ? { ...x, cantidad: qtyFusion, subtotal: Number(x.precio) * qtyFusion }
+            : x
+        );
+      }
+
+      // Reemplazar por nuevo item
+      return [
+        ...sinViejo,
+        {
+          productoId: newPid,
+          nombre: prodNuevo.nombre,
+          precio: precioNuevo,
+          cantidad: newQty,
+          subtotal: precioNuevo * newQty,
+        },
+      ].sort((a, b) => a.productoId - b.productoId);
+    });
+
+    cancelarEdicion();
   }
 
   async function registrarVenta() {
@@ -100,7 +176,7 @@ export default function NuevaVentaPage() {
       setOkMsg(`Venta creada (ID ${venta.id}) - Total: ${venta.total}`);
       setItems([]);
       setClienteId("");
-      // recargar productos para ver stock actualizado
+      cancelarEdicion();
       await cargarData();
     } catch (e) {
       setError(e.message);
@@ -108,97 +184,189 @@ export default function NuevaVentaPage() {
   }
 
   return (
-    <div style={{ padding: 24, fontFamily: "system-ui" }}>
-      <h1>Nueva Venta</h1>
+    <div className="card">
+      <div className="row" style={{ justifyContent: "space-between" }}>
+        <div>
+          <h1 className="m0">Nueva Venta</h1>
+          <p className="m0" style={{ color: "var(--muted)", marginTop: 6 }}>
+            Cargá items, registrá la venta y el stock se descuenta automáticamente.
+          </p>
+        </div>
 
-      {loading && <p>Cargando datos...</p>}
+        <button className="btn" type="button" onClick={cargarData} disabled={loading}>
+          Refrescar
+        </button>
+      </div>
+
+      {loading && (
+        <p className="mt12" style={{ color: "var(--muted)" }}>
+          Cargando datos...
+        </p>
+      )}
 
       {error && (
-        <div style={{ marginBottom: 12, color: "crimson" }}>
+        <div className="alert alertError mt12">
           <b>Error:</b> {error}
         </div>
       )}
+
       {okMsg && (
-        <div style={{ marginBottom: 12, color: "green" }}>
+        <div className="alert alertOk mt12">
           <b>OK:</b> {okMsg}
         </div>
       )}
 
-      <h2>Cliente (opcional)</h2>
-      <select value={clienteId} onChange={(e) => setClienteId(e.target.value)}>
-        <option value="">(Sin cliente)</option>
-        {clientes.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.id} - {c.nombre}
-          </option>
-        ))}
-      </select>
+      <div className="mt12 card cardFlat">
+        <h2 className="cardTitle">Cliente (opcional)</h2>
 
-      <h2 style={{ marginTop: 20 }}>Agregar productos</h2>
-
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-        <select value={productoId} onChange={(e) => setProductoId(e.target.value)}>
-          <option value="">Elegí producto</option>
-          {productos.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.id} - {p.nombre} (stock {p.stock}) - ${p.precio}
+        <label className="label">Seleccionar cliente</label>
+        <select className="select" value={clienteId} onChange={(e) => setClienteId(e.target.value)}>
+          <option value="">(Sin cliente)</option>
+          {clientes.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.id} - {c.nombre}
             </option>
           ))}
         </select>
-
-        <input
-          value={cantidad}
-          onChange={(e) => setCantidad(e.target.value)}
-          placeholder="Cantidad"
-          inputMode="numeric"
-          style={{ width: 120 }}
-        />
-
-        <button type="button" onClick={agregarItem}>
-          Agregar
-        </button>
       </div>
 
-      <h2 style={{ marginTop: 20 }}>Carrito</h2>
+      <div className="mt12 card cardFlat">
+        <h2 className="cardTitle">Agregar productos</h2>
 
-      {items.length === 0 ? (
-        <p>No hay items.</p>
-      ) : (
-        <table border="1" cellPadding="8" style={{ borderCollapse: "collapse", width: "100%" }}>
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Precio</th>
-              <th>Cantidad</th>
-              <th>Subtotal</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((it) => (
-              <tr key={it.productoId}>
-                <td>
-                  {it.productoId} - {it.nombre}
-                </td>
-                <td>${it.precio}</td>
-                <td>{it.cantidad}</td>
-                <td>${it.subtotal}</td>
-                <td>
-                  <button type="button" onClick={() => quitarItem(it.productoId)}>
-                    Quitar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+        <div className="grid2">
+          <div>
+            <label className="label">Producto</label>
+            <select className="select" value={productoId} onChange={(e) => setProductoId(e.target.value)}>
+              <option value="">Elegí producto</option>
+              {productos.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.id} - {p.nombre} (stock {p.stock}) - ${p.precio}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      <h3 style={{ marginTop: 12 }}>Total: ${total}</h3>
+          <div>
+            <label className="label">Cantidad</label>
+            <input
+              className="input"
+              value={cantidad}
+              onChange={(e) => setCantidad(e.target.value)}
+              placeholder="Ej: 1"
+              inputMode="numeric"
+            />
+          </div>
+        </div>
 
-      <button type="button" onClick={registrarVenta} disabled={items.length === 0}>
-        Registrar venta
-      </button>
+        <div className="row mt12" style={{ justifyContent: "flex-end" }}>
+          <button className="btn btnPrimary" type="button" onClick={agregarItem}>
+            Agregar al carrito
+          </button>
+        </div>
+      </div>
+
+      <div className="mt12">
+        <div className="row" style={{ justifyContent: "space-between" }}>
+          <h2 className="m0">Carrito</h2>
+          <p className="m0" style={{ color: "var(--muted)" }}>
+            Items: <b>{items.length}</b>
+          </p>
+        </div>
+
+        {items.length === 0 ? (
+          <p className="mt12">No hay items.</p>
+        ) : (
+          <div className="tableWrap mt12">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Precio</th>
+                  <th>Cantidad</th>
+                  <th>Subtotal</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((it) => (
+                  <tr key={it.productoId}>
+                    <td>
+                      {it.productoId} - {it.nombre}
+                    </td>
+                    <td>${it.precio}</td>
+
+                    <td>
+                      {editRowPid === it.productoId ? (
+                        <input
+                          className="input"
+                          style={{ width: 110 }}
+                          inputMode="numeric"
+                          value={editCantidad}
+                          onChange={(e) => setEditCantidad(e.target.value)}
+                        />
+                      ) : (
+                        it.cantidad
+                      )}
+                    </td>
+
+                    <td>${it.subtotal}</td>
+
+                    <td>
+                      {editRowPid === it.productoId ? (
+                        <div className="row" style={{ alignItems: "center" }}>
+                          <select
+                            className="select"
+                            style={{ width: 260 }}
+                            value={editProductoId}
+                            onChange={(e) => setEditProductoId(e.target.value)}
+                          >
+                            {productos.map((p) => (
+                              <option key={p.id} value={p.id}>
+                                {p.id} - {p.nombre} (stock {p.stock}) - ${p.precio}
+                              </option>
+                            ))}
+                          </select>
+
+                          {/* Guardar y Cancelar juntos, sin wrap */}
+                          <div className="rowNoWrap">
+                            <button className="btn btnPrimary btnSm" type="button" onClick={guardarEdicion}>
+                              Guardar
+                            </button>
+                            <button className="btn btnNeutral btnSm" type="button" onClick={cancelarEdicion}>
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="row">
+                          <button className="btn btnWarning btnSm" type="button" onClick={() => iniciarEdicion(it)}>
+                            Modificar
+                          </button>
+                          <button
+                            className="btn btnDanger btnSm"
+                            type="button"
+                            onClick={() => quitarItem(it.productoId)}
+                          >
+                            Quitar
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div className="row mt12" style={{ justifyContent: "space-between" }}>
+          <h3 className="m0">Total: ${total}</h3>
+
+          <button className="btn btnPrimary" type="button" onClick={registrarVenta} disabled={items.length === 0}>
+            Registrar venta
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
