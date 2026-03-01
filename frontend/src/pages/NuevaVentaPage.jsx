@@ -316,7 +316,7 @@ export default function NuevaVentaPage() {
                         <div className="row" style={{ alignItems: "center" }}>
                           <select
                             className="select"
-                            style={{ width: 260 }}
+                            style={{ width: "min(260px, 60vw)" }}
                             value={editProductoId}
                             onChange={(e) => setEditProductoId(e.target.value)}
                           >
