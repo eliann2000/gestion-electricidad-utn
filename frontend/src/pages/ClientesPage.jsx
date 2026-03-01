@@ -117,10 +117,6 @@ export default function ClientesPage() {
             Total: <b>{clientes.length}</b>
           </p>
         </div>
-
-        <button className="btn" type="button" onClick={cargarClientes} disabled={loading}>
-          Refrescar
-        </button>
       </div>
 
       {error && (

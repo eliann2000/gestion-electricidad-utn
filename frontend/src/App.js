@@ -16,8 +16,7 @@ export default function App() {
       <header className="header">
         <div className="headerInner">
           <div className="brand">
-            <h2>Gestión Electricidad (MVP)</h2>
-            <small>Stock • Ventas • Reportes</small>
+            <h2>Sistema de gestión</h2>
           </div>
 
           <nav className="nav">
@@ -31,7 +30,7 @@ export default function App() {
               Nueva Venta
             </button>
             <button className={navBtnClass("stock")} onClick={() => setPage("stock")}>
-              Stock Bajo
+              Reportes
             </button>
           </nav>
         </div>

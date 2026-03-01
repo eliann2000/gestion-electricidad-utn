@@ -32,10 +32,6 @@ export default function StockBajoPage() {
             Productos con <b>stock ≤ stock mínimo</b>.
           </p>
         </div>
-
-        <button className="btn" type="button" onClick={cargar} disabled={loading}>
-          Refrescar
-        </button>
       </div>
 
       {error && (

@@ -192,10 +192,6 @@ export default function NuevaVentaPage() {
             Cargá items, registrá la venta y el stock se descuenta automáticamente.
           </p>
         </div>
-
-        <button className="btn" type="button" onClick={cargarData} disabled={loading}>
-          Refrescar
-        </button>
       </div>
 
       {loading && (

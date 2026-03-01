@@ -127,10 +127,6 @@ export default function ProductosPage() {
             Total: <b>{productos.length}</b>
           </p>
         </div>
-
-        <button className="btn" type="button" onClick={cargarProductos} disabled={loading}>
-          Refrescar
-        </button>
       </div>
 
       {error && (
