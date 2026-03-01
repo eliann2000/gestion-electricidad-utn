@@ -1,0 +1,285 @@
+/* ========== Base ========== */
+:root{
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --primary: #2563eb;
+  --primary-2: #1d4ed8;
+  --danger: #dc2626;
+  --danger-2: #b91c1c;
+  --ok: #16a34a;
+  --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --radius: 12px;
+}
+
+*{ box-sizing: border-box; }
+
+body{
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* ========== Layout ========== */
+.app{
+  min-height: 100vh;
+}
+
+.header{
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+.headerInner{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand{
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.brand h2{
+  margin: 0;
+  font-size: 16px;
+  letter-spacing: 0.2px;
+}
+.brand small{
+  color: var(--muted);
+}
+
+.nav{
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.main{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 18px 16px 32px;
+}
+
+/* ========== UI blocks ========== */
+.card{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.cardTitle{
+  margin: 0 0 12px 0;
+  font-size: 16px;
+}
+
+.grid2{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 800px){
+  .grid2{ grid-template-columns: 1fr; }
+}
+
+.row{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ========== Inputs ========== */
+.input, .select{
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  outline: none;
+}
+.input:focus, .select:focus{
+  border-color: rgba(37, 99, 235, 0.6);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.label{
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.checkboxRow{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--muted);
+}
+
+/* ========== Buttons ========== */
+.btn{
+  border: 1px solid var(--border);
+  background: #fff;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.15s ease;
+  font-weight: 600;
+}
+.btn:hover{
+  transform: translateY(-1px);
+}
+.btn:disabled{
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btnPrimary{
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.btnPrimary:hover{
+  background: var(--primary-2);
+  border-color: var(--primary-2);
+}
+
+.btnDanger{
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+.btnDanger:hover{
+  background: var(--danger-2);
+  border-color: var(--danger-2);
+}
+
+.btnGhost{
+  background: transparent;
+}
+
+/* Active nav button */
+.nav .btnActive{
+  background: rgba(37,99,235,0.12);
+  border-color: rgba(37,99,235,0.35);
+  color: var(--primary-2);
+}
+
+/* ========== Alerts ========== */
+.alert{
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+.alertError{
+  border-color: rgba(220,38,38,0.35);
+  background: rgba(220,38,38,0.06);
+  color: #991b1b;
+}
+.alertOk{
+  border-color: rgba(22,163,74,0.35);
+  background: rgba(22,163,74,0.06);
+  color: #14532d;
+}
+
+/* ========== Tables ========== */
+.tableWrap{
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.table{
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+.table th, .table td{
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+.table thead th{
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: #f8fafc;
+}
+.table tr:hover td{
+  background: #fafafa;
+}
+
+/* ========== Small helpers ========== */
+.m0{ margin: 0; }
+.mt12{ margin-top: 12px; }
+.mb12{ margin-bottom: 12px; }
+
+/* Card sin sombra/borde fuerte (para secciones dentro de una card) */
+.cardFlat{
+  background: transparent;
+  border: 1px dashed var(--border);
+  box-shadow: none;
+}
+
+/* Botón chico para acciones de tabla */
+.btnSm{
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+/* Separación entre secciones dentro del main */
+.main > * {
+  margin-bottom: 16px;
+}
+
+/* Botón "Modificar" (otro color) */
+.btnWarning{
+  background: #f59e0b;           /* ámbar */
+  border-color: #f59e0b;
+  color: #111827;
+}
+.btnWarning:hover{
+  background: #d97706;
+  border-color: #d97706;
+  transform: translateY(-1px);
+}
+
+/* Botón "Cancelar" (neutral gris) */
+.btnNeutral{
+  background: #f1f5f9;           /* gris clarito */
+  border-color: #e2e8f0;
+  color: #0f172a;
+}
+.btnNeutral:hover{
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+/* Para que Guardar/Cancelar queden pegados y no se desproporcionen */
+.rowNoWrap{
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
