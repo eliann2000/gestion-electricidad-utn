@@ -67,7 +67,6 @@ export default function ClientesPage() {
     setError("");
 
     const body = buildBodyFromForm();
-
     if (!body.nombre) return setError("El nombre es obligatorio");
 
     try {
@@ -110,80 +109,150 @@ export default function ClientesPage() {
   }
 
   return (
-    <div style={{ padding: 24, fontFamily: "system-ui" }}>
-      <h1>Clientes</h1>
+    <div className="card">
+      <div className="row" style={{ justifyContent: "space-between" }}>
+        <div>
+          <h1 className="m0">Clientes</h1>
+          <p className="m0" style={{ color: "var(--muted)", marginTop: 6 }}>
+            Total: <b>{clientes.length}</b>
+          </p>
+        </div>
+
+        <button className="btn" type="button" onClick={cargarClientes} disabled={loading}>
+          Refrescar
+        </button>
+      </div>
 
       {error && (
-        <div style={{ marginBottom: 12, color: "crimson" }}>
+        <div className="alert alertError mt12">
           <b>Error:</b> {error}
         </div>
       )}
 
-      <form onSubmit={onSubmit} style={{ marginBottom: 16 }}>
-        <h2>{editingId === null ? "Nuevo cliente" : `Editando cliente ID ${editingId}`}</h2>
+      <div className="mt12 card cardFlat">
+        <h2 className="cardTitle">
+          {editingId === null ? "Nuevo cliente" : `Editando cliente ID ${editingId}`}
+        </h2>
 
-        <div style={{ display: "grid", gap: 8, maxWidth: 420 }}>
-          <input name="nombre" placeholder="Nombre *" value={form.nombre} onChange={onChange} />
-          <input name="telefono" placeholder="Teléfono" value={form.telefono} onChange={onChange} />
-          <input name="email" placeholder="Email" value={form.email} onChange={onChange} />
-          <input name="direccion" placeholder="Dirección" value={form.direccion} onChange={onChange} />
+        <form onSubmit={onSubmit}>
+          <div className="grid2">
+            <div>
+              <label className="label">Nombre *</label>
+              <input
+                className="input"
+                name="nombre"
+                placeholder="Ej: Juan Pérez"
+                value={form.nombre}
+                onChange={onChange}
+              />
+            </div>
 
-          <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <input type="checkbox" name="activo" checked={form.activo} onChange={onChange} />
-            Activo
-          </label>
+            <div>
+              <label className="label">Teléfono</label>
+              <input
+                className="input"
+                name="telefono"
+                placeholder="Ej: 3515551234"
+                value={form.telefono}
+                onChange={onChange}
+              />
+            </div>
 
-          <div style={{ display: "flex", gap: 8 }}>
-            <button type="submit">{editingId === null ? "Crear" : "Guardar cambios"}</button>
-            {editingId !== null && (
-              <button type="button" onClick={resetForm}>
-                Cancelar
-              </button>
-            )}
+            <div>
+              <label className="label">Email</label>
+              <input
+                className="input"
+                name="email"
+                placeholder="Ej: juan@gmail.com"
+                value={form.email}
+                onChange={onChange}
+              />
+            </div>
+
+            <div>
+              <label className="label">Dirección</label>
+              <input
+                className="input"
+                name="direccion"
+                placeholder="Ej: Córdoba"
+                value={form.direccion}
+                onChange={onChange}
+              />
+            </div>
           </div>
-        </div>
-      </form>
 
-      <h2>Listado</h2>
+          <div className="row mt12" style={{ justifyContent: "space-between" }}>
+            <label className="checkboxRow">
+              <input type="checkbox" name="activo" checked={form.activo} onChange={onChange} />
+              Activo
+            </label>
 
-      {loading ? (
-        <p>Cargando...</p>
-      ) : clientes.length === 0 ? (
-        <p>No hay clientes.</p>
+            <div className="row">
+              <button className="btn btnPrimary" type="submit">
+                {editingId === null ? "Crear" : "Guardar cambios"}
+              </button>
+
+              {editingId !== null && (
+                <button className="btn btnGhost" type="button" onClick={resetForm}>
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div className="row mt12" style={{ justifyContent: "space-between" }}>
+        <h2 className="m0">Listado</h2>
+        {loading && <small style={{ color: "var(--muted)" }}>Cargando...</small>}
+      </div>
+
+      {!loading && clientes.length === 0 ? (
+        <p className="mt12">No hay clientes.</p>
       ) : (
-        <table border="1" cellPadding="8" style={{ borderCollapse: "collapse", width: "100%" }}>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Teléfono</th>
-              <th>Email</th>
-              <th>Dirección</th>
-              <th>Activo</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {clientes.map((c) => (
-              <tr key={c.id}>
-                <td>{c.id}</td>
-                <td>{c.nombre}</td>
-                <td>{c.telefono ?? "-"}</td>
-                <td>{c.email ?? "-"}</td>
-                <td>{c.direccion ?? "-"}</td>
-                <td>{c.activo ? "Sí" : "No"}</td>
-                <td style={{ display: "flex", gap: 8 }}>
-                  <button type="button" onClick={() => onEditarClick(c)}>
-                    Editar
-                  </button>
-                  <button type="button" onClick={() => onEliminarClick(c)}>
-                    Eliminar
-                  </button>
-                </td>
+        <div className="tableWrap mt12">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th>Dirección</th>
+                <th>Activo</th>
+                <th>Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {clientes.map((c) => (
+                <tr key={c.id}>
+                  <td>{c.id}</td>
+                  <td>{c.nombre}</td>
+                  <td>{c.telefono ?? "-"}</td>
+                  <td>{c.email ?? "-"}</td>
+                  <td>{c.direccion ?? "-"}</td>
+                  <td>{c.activo ? "Sí" : "No"}</td>
+                  <td>
+                    <div className="row">
+                      <button className="btn btnSm" type="button" onClick={() => onEditarClick(c)}>
+                        Editar
+                      </button>
+                      <button className="btn btnDanger btnSm" type="button" onClick={() => onEliminarClick(c)}>
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+
+              {loading && (
+                <tr>
+                  <td colSpan="7">Cargando...</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
