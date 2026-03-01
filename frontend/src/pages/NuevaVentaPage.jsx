@@ -16,6 +16,9 @@ export default function NuevaVentaPage() {
   const [okMsg, setOkMsg] = useState("");
   const [loading, setLoading] = useState(true);
 
+  // ✅ NUEVO: checkbox para enviar email
+  const [enviarEmail, setEnviarEmail] = useState(false);
+
   // Edición por fila del carrito
   const [editRowPid, setEditRowPid] = useState(null); // productoId de la fila que edito
   const [editProductoId, setEditProductoId] = useState("");
@@ -176,11 +179,42 @@ export default function NuevaVentaPage() {
     };
 
     try {
+      // 1) Crear venta
       const venta = await ventasApi.create(body);
-      setOkMsg(`Venta creada (ID ${venta.id}) - Total: ${venta.total}`);
+
+      // 2) Si está tildado, enviar correo
+      if (enviarEmail) {
+        // Si no hay cliente seleccionado, probablemente no haya email en backend.
+        // Para MVP: pedimos email manual solo cuando no hay cliente.
+        let to;
+        if (!clienteId) {
+          to = window.prompt("Ingresá el email destino para enviar el comprobante:");
+          if (!to) throw new Error("No se envió el correo: no ingresaste email destino.");
+        }
+
+        const url = `http://localhost:3001/api/ventas/${venta.id}/enviar-correo`;
+        const resp = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(to ? { to } : {}),
+        });
+
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.message || "Error enviando correo");
+      }
+
+      // 3) Mensaje OK
+      setOkMsg(
+        enviarEmail
+          ? `Venta creada (ID ${venta.id}) - Total: ${venta.total}. Correo enviado ✅`
+          : `Venta creada (ID ${venta.id}) - Total: ${venta.total}`
+      );
+
+      // 4) Limpiar UI
       setItems([]);
       setClienteId("");
       cancelarEdicion();
+      setEnviarEmail(false); // opcional: lo destildamos para la próxima venta
       await cargarData();
     } catch (e) {
       setError(e.message);
@@ -359,12 +393,25 @@ export default function NuevaVentaPage() {
           </div>
         )}
 
-        <div className="row mt12" style={{ justifyContent: "space-between" }}>
+        <div className="row mt12" style={{ justifyContent: "space-between", alignItems: "center" }}>
           <h3 className="m0">Total: ${total}</h3>
 
-          <button className="btn btnPrimary" type="button" onClick={registrarVenta} disabled={items.length === 0}>
-            Registrar venta
-          </button>
+          {/* ✅ NUEVO: checkbox + botón */}
+          <div className="row" style={{ gap: 12, alignItems: "center" }}>
+            <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input
+                type="checkbox"
+                checked={enviarEmail}
+                onChange={(e) => setEnviarEmail(e.target.checked)}
+                disabled={items.length === 0}
+              />
+              Enviar comprobante por email
+            </label>
+
+            <button className="btn btnPrimary" type="button" onClick={registrarVenta} disabled={items.length === 0}>
+              Registrar venta
+            </button>
+          </div>
         </div>
       </div>
     </div>

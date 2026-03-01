@@ -1,5 +1,6 @@
 const express = require("express");
 const prisma = require("../prisma");
+const { transporter } = require("../services/mailer");
 
 const router = express.Router();
 
@@ -158,6 +159,78 @@ router.post("/", async (req, res) => {
   } catch (err) {
     // Errores típicos: stock insuficiente, cantidad inválida, etc.
     res.status(400).json({ message: err.message || "Error creando venta" });
+  }
+});
+
+/**
+ * POST /api/ventas/:id/enviar-correo
+ * Envía el comprobante de una venta por email
+ * - Usa cliente.email si existe
+ * - O acepta { "to": "destino@gmail.com" } en body
+ */
+router.post("/:id/enviar-correo", async (req, res) => {
+  const id = Number(req.params.id);
+  const { to } = req.body || {};
+
+  try {
+    const venta = await prisma.venta.findUnique({
+      where: { id },
+      include: {
+        cliente: true,
+        detalles: { include: { producto: true } },
+      },
+    });
+
+    if (!venta) return res.status(404).json({ message: "Venta no encontrada" });
+
+    const emailDestino = to || venta.cliente?.email;
+    if (!emailDestino) {
+      return res.status(400).json({
+        message: "No hay email destino. Cargá email al cliente o mandá {to} en el body.",
+      });
+    }
+
+    const filas = venta.detalles
+      .map((d) => `
+        <tr>
+          <td>${d.producto?.nombre ?? "Producto"}</td>
+          <td style="text-align:center;">${d.cantidad}</td>
+          <td style="text-align:right;">$${Number(d.precioUnitario)}</td>
+          <td style="text-align:right;">$${Number(d.subtotal)}</td>
+        </tr>
+      `)
+      .join("");
+
+    const html = `
+      <div style="font-family: Arial, sans-serif;">
+        <h2>Comprobante de venta #${venta.id}</h2>
+        <p><b>Cliente:</b> ${venta.cliente?.nombre ?? "Consumidor final"}</p>
+
+        <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+          <thead>
+            <tr>
+              <th>Producto</th><th>Cant.</th><th>Unit.</th><th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>${filas}</tbody>
+        </table>
+
+        <h3 style="text-align:right;">Total: $${Number(venta.total)}</h3>
+        <p>Gracias por tu compra.</p>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from: process.env.MAIL_FROM,
+      to: emailDestino,
+      subject: `Comprobante de venta #${venta.id}`,
+      html,
+    });
+
+    return res.json({ ok: true, message: "Correo enviado" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Error enviando correo" });
   }
 });
 
