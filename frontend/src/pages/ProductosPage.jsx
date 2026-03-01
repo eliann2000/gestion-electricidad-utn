@@ -18,6 +18,11 @@ export default function ProductosPage() {
     activo: true,
   });
 
+  // ✅ filtros del listado
+  const [filtroNombre, setFiltroNombre] = useState("");
+  const [filtroMarca, setFiltroMarca] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("todos"); // todos | activos | inactivos
+
   function resetForm() {
     setForm({
       nombre: "",
@@ -75,7 +80,18 @@ export default function ProductosPage() {
     const body = buildBodyFromForm();
 
     if (!body.nombre) return setError("El nombre es obligatorio");
-    if (!Number.isFinite(body.precio)) return setError("Precio inválido");
+
+    if (!Number.isFinite(body.precio) || body.precio < 0) {
+      return setError("El precio debe ser 0 o mayor");
+    }
+
+    if (!Number.isFinite(body.stock) || body.stock < 0) {
+      return setError("El stock debe ser un número mayor o igual a 0");
+    }
+
+    if (!Number.isFinite(body.stockMinimo) || body.stockMinimo < 0) {
+      return setError("El stock mínimo debe ser un número mayor o igual a 0");
+    }
 
     try {
       if (editingId === null) {
@@ -114,9 +130,41 @@ export default function ProductosPage() {
       await cargarProductos();
       if (editingId === p.id) resetForm();
     } catch (e) {
-      setError(e.message);
+      const msg = String(e?.message || "");
+
+      // Si el backend te devuelve el mensaje nuevo (409) o si por alguna razón llega el error viejo
+      if (
+        msg.includes("No se puede eliminar este producto") ||
+        msg.includes("P2003") ||
+        msg.toLowerCase().includes("foreign key") ||
+        msg.toLowerCase().includes("constraint")
+      ) {
+        return setError(
+          "No se puede eliminar este producto porque ya fue utilizado en una venta. "
+        );
+      }
+
+      setError(msg || "Error al eliminar el producto");
     }
   }
+
+  // ✅ lista filtrada
+  const productosFiltrados = productos.filter((p) => {
+    const nombre = (p.nombre ?? "").toLowerCase();
+    const marca = (p.marca ?? "").toLowerCase();
+
+    const okNombre = nombre.includes(filtroNombre.toLowerCase());
+    const okMarca = marca.includes(filtroMarca.toLowerCase());
+
+    const okEstado =
+      filtroEstado === "todos"
+        ? true
+        : filtroEstado === "activos"
+          ? !!p.activo
+          : !p.activo;
+
+    return okNombre && okMarca && okEstado;
+  });
 
   return (
     <div className="card">
@@ -157,6 +205,8 @@ export default function ProductosPage() {
               <label className="label">Precio *</label>
               <input
                 className="input"
+                type="number"
+                min="0"
                 name="precio"
                 value={form.precio}
                 onChange={onChange}
@@ -191,6 +241,9 @@ export default function ProductosPage() {
               <label className="label">Stock</label>
               <input
                 className="input"
+                type="number"
+                min="0"
+                step="1"
                 name="stock"
                 value={form.stock}
                 onChange={onChange}
@@ -203,6 +256,9 @@ export default function ProductosPage() {
               <label className="label">Stock mínimo</label>
               <input
                 className="input"
+                type="number"
+                min="0"
+                step="1"
                 name="stockMinimo"
                 value={form.stockMinimo}
                 onChange={onChange}
@@ -238,8 +294,40 @@ export default function ProductosPage() {
         {loading && <small style={{ color: "var(--muted)" }}>Cargando...</small>}
       </div>
 
-      {!loading && productos.length === 0 ? (
-        <p className="mt12">No hay productos.</p>
+      {/* ✅ filtros del listado (uno al lado del otro) */}
+      <div className="row mt12" style={{ gap: 12, flexWrap: "wrap" }}>
+        <div style={{ flex: "1 1 240px" }}>
+          <label className="label">Buscar por nombre</label>
+          <input
+            className="input"
+            value={filtroNombre}
+            onChange={(e) => setFiltroNombre(e.target.value)}
+            placeholder="Ej: lámpara"
+          />
+        </div>
+
+        <div style={{ flex: "1 1 240px" }}>
+          <label className="label">Buscar por marca</label>
+          <input
+            className="input"
+            value={filtroMarca}
+            onChange={(e) => setFiltroMarca(e.target.value)}
+            placeholder="Ej: ferrolux"
+          />
+        </div>
+
+        <div style={{ flex: "0 0 220px" }}>
+          <label className="label">Estado</label>
+          <select className="select" value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
+            <option value="todos">Todos</option>
+            <option value="activos">Activos</option>
+            <option value="inactivos">Inactivos</option>
+          </select>
+        </div>
+      </div>
+
+      {!loading && productosFiltrados.length === 0 ? (
+        <p className="mt12">No hay productos que coincidan con el filtro.</p>
       ) : (
         <div className="tableWrap mt12">
           <table className="table">
@@ -257,7 +345,7 @@ export default function ProductosPage() {
               </tr>
             </thead>
             <tbody>
-              {productos.map((p) => (
+              {productosFiltrados.map((p) => (
                 <tr key={p.id}>
                   <td>{p.id}</td>
                   <td>{p.nombre}</td>
@@ -279,6 +367,7 @@ export default function ProductosPage() {
                   </td>
                 </tr>
               ))}
+
               {loading && (
                 <tr>
                   <td colSpan="9">Cargando...</td>
