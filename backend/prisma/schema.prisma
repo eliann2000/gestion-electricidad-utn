@@ -23,12 +23,12 @@ model Producto {
 model Cliente {
   id        Int     @id @default(autoincrement())
   nombre    String
-  telefono  String?
-  email     String?
+  apellido  String
+  telefono  String
+  email     String
   direccion String?
-  activo    Boolean @default(true)
 
-  ventas     Venta[]
+  ventas    Venta[]
 }
 
 model Venta {

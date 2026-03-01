@@ -10,19 +10,22 @@ export default function ClientesPage() {
 
   const [form, setForm] = useState({
     nombre: "",
+    apellido: "",
     telefono: "",
     email: "",
     direccion: "",
-    activo: true,
   });
+
+  // ✅ buscador
+  const [filtro, setFiltro] = useState("");
 
   function resetForm() {
     setForm({
       nombre: "",
+      apellido: "",
       telefono: "",
       email: "",
       direccion: "",
-      activo: true,
     });
     setEditingId(null);
   }
@@ -45,20 +48,20 @@ export default function ClientesPage() {
   }, []);
 
   function onChange(e) {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
   }
 
   function buildBodyFromForm() {
     return {
       nombre: form.nombre.trim(),
-      telefono: form.telefono.trim() || null,
-      email: form.email.trim() || null,
+      apellido: form.apellido.trim(),
+      telefono: form.telefono.trim(),
+      email: form.email.trim(),
       direccion: form.direccion.trim() || null,
-      activo: form.activo,
     };
   }
 
@@ -67,7 +70,11 @@ export default function ClientesPage() {
     setError("");
 
     const body = buildBodyFromForm();
+
     if (!body.nombre) return setError("El nombre es obligatorio");
+    if (!body.apellido) return setError("El apellido es obligatorio");
+    if (!body.telefono) return setError("El teléfono es obligatorio");
+    if (!body.email) return setError("El email es obligatorio");
 
     try {
       if (editingId === null) {
@@ -86,16 +93,16 @@ export default function ClientesPage() {
     setEditingId(c.id);
     setForm({
       nombre: c.nombre ?? "",
+      apellido: c.apellido ?? "",
       telefono: c.telefono ?? "",
       email: c.email ?? "",
       direccion: c.direccion ?? "",
-      activo: !!c.activo,
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function onEliminarClick(c) {
-    const ok = window.confirm(`¿Eliminar el cliente "${c.nombre}" (ID ${c.id})?`);
+    const ok = window.confirm(`¿Eliminar el cliente "${c.nombre} ${c.apellido}" (ID ${c.id})?`);
     if (!ok) return;
 
     setError("");
@@ -108,13 +115,19 @@ export default function ClientesPage() {
     }
   }
 
+  // ✅ lista filtrada por nombre/apellido
+  const clientesFiltrados = clientes.filter((c) => {
+    const texto = `${c.nombre ?? ""} ${c.apellido ?? ""}`.toLowerCase();
+    return texto.includes(filtro.toLowerCase());
+  });
+
   return (
     <div className="card">
       <div className="row" style={{ justifyContent: "space-between" }}>
         <div>
           <h1 className="m0">Clientes</h1>
           <p className="m0" style={{ color: "var(--muted)", marginTop: 6 }}>
-            Total: <b>{clientes.length}</b>
+            Total: <b>{clientesFiltrados.length}</b>
           </p>
         </div>
       </div>
@@ -137,31 +150,44 @@ export default function ClientesPage() {
               <input
                 className="input"
                 name="nombre"
-                placeholder="Ej: Juan Pérez"
+                placeholder="Ej: Juan"
                 value={form.nombre}
                 onChange={onChange}
               />
             </div>
 
             <div>
-              <label className="label">Teléfono</label>
+              <label className="label">Apellido *</label>
+              <input
+                className="input"
+                name="apellido"
+                placeholder="Ej: Pérez"
+                value={form.apellido}
+                onChange={onChange}
+              />
+            </div>
+
+            <div>
+              <label className="label">Teléfono *</label>
               <input
                 className="input"
                 name="telefono"
                 placeholder="Ej: 3515551234"
                 value={form.telefono}
                 onChange={onChange}
+                inputMode="numeric"
               />
             </div>
 
             <div>
-              <label className="label">Email</label>
+              <label className="label">Email *</label>
               <input
                 className="input"
                 name="email"
                 placeholder="Ej: juan@gmail.com"
                 value={form.email}
                 onChange={onChange}
+                inputMode="email"
               />
             </div>
 
@@ -177,12 +203,7 @@ export default function ClientesPage() {
             </div>
           </div>
 
-          <div className="row mt12" style={{ justifyContent: "space-between" }}>
-            <label className="checkboxRow">
-              <input type="checkbox" name="activo" checked={form.activo} onChange={onChange} />
-              Activo
-            </label>
-
+          <div className="row mt12" style={{ justifyContent: "flex-end" }}>
             <div className="row">
               <button className="btn btnPrimary" type="submit">
                 {editingId === null ? "Crear" : "Guardar cambios"}
@@ -203,31 +224,44 @@ export default function ClientesPage() {
         {loading && <small style={{ color: "var(--muted)" }}>Cargando...</small>}
       </div>
 
-      {!loading && clientes.length === 0 ? (
-        <p className="mt12">No hay clientes.</p>
+      {/* ✅ buscador */}
+      <div className="row mt12" style={{ gap: 12, flexWrap: "wrap" }}>
+        <div style={{ flex: "1 1 280px" }}>
+          <label className="label">Buscar por nombre o apellido</label>
+          <input
+            className="input"
+            value={filtro}
+            onChange={(e) => setFiltro(e.target.value)}
+            placeholder="Ej: juan o pérez"
+          />
+        </div>
+      </div>
+
+      {!loading && clientesFiltrados.length === 0 ? (
+        <p className="mt12">No hay clientes que coincidan con la búsqueda.</p>
       ) : (
         <div className="tableWrap mt12">
           <table className="table">
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Nombre</th>
+                <th>Cliente</th>
                 <th>Teléfono</th>
                 <th>Email</th>
                 <th>Dirección</th>
-                <th>Activo</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {clientes.map((c) => (
+              {clientesFiltrados.map((c) => (
                 <tr key={c.id}>
                   <td>{c.id}</td>
-                  <td>{c.nombre}</td>
-                  <td>{c.telefono ?? "-"}</td>
-                  <td>{c.email ?? "-"}</td>
+                  <td>
+                    {c.nombre} {c.apellido}
+                  </td>
+                  <td>{c.telefono}</td>
+                  <td>{c.email}</td>
                   <td>{c.direccion ?? "-"}</td>
-                  <td>{c.activo ? "Sí" : "No"}</td>
                   <td>
                     <div className="row">
                       <button className="btn btnSm" type="button" onClick={() => onEditarClick(c)}>
@@ -243,7 +277,7 @@ export default function ClientesPage() {
 
               {loading && (
                 <tr>
-                  <td colSpan="7">Cargando...</td>
+                  <td colSpan="6">Cargando...</td>
                 </tr>
               )}
             </tbody>

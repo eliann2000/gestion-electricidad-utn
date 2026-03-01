@@ -26,7 +26,11 @@ export default function NuevaVentaPage() {
     setError("");
     try {
       const [c, p] = await Promise.all([clientesApi.list(), productosApi.list()]);
-      setClientes(c.filter((x) => x.activo));
+      setClientes(
+        [...c].sort((a, b) =>
+          `${a.apellido} ${a.nombre}`.localeCompare(`${b.apellido} ${b.nombre}`, "es")
+        )
+      );
       setProductos(p.filter((x) => x.activo));
     } catch (e) {
       setError(e.message);
@@ -220,7 +224,7 @@ export default function NuevaVentaPage() {
           <option value="">(Sin cliente)</option>
           {clientes.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.id} - {c.nombre}
+              {c.id} - {c.apellido} {c.nombre}
             </option>
           ))}
         </select>
