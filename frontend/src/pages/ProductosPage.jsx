@@ -76,8 +76,6 @@ export default function ProductosPage() {
 
     if (!body.nombre) return setError("El nombre es obligatorio");
     if (!Number.isFinite(body.precio)) return setError("Precio inválido");
-    if (!Number.isFinite(body.stock) || body.stock < 0) return setError("Stock inválido");
-    if (!Number.isFinite(body.stockMinimo) || body.stockMinimo < 0) return setError("Stock mínimo inválido");
 
     try {
       if (editingId === null) {
@@ -121,92 +119,178 @@ export default function ProductosPage() {
   }
 
   return (
-    <div style={{ padding: 24, fontFamily: "system-ui" }}>
-      <h1>Productos</h1>
+    <div className="card">
+      <div className="row" style={{ justifyContent: "space-between" }}>
+        <div>
+          <h1 className="m0">Productos</h1>
+          <p className="m0" style={{ color: "var(--muted)", marginTop: 6 }}>
+            Total: <b>{productos.length}</b>
+          </p>
+        </div>
+
+        <button className="btn" type="button" onClick={cargarProductos} disabled={loading}>
+          Refrescar
+        </button>
+      </div>
 
       {error && (
-        <div style={{ marginBottom: 12, color: "crimson" }}>
+        <div className="alert alertError mt12">
           <b>Error:</b> {error}
         </div>
       )}
 
-      <form onSubmit={onSubmit} style={{ marginBottom: 16 }}>
-        <h2>{editingId === null ? "Nuevo producto" : `Editando producto ID ${editingId}`}</h2>
+      <div className="mt12 card cardFlat">
+        <h2 className="cardTitle">
+          {editingId === null ? "Nuevo producto" : `Editando producto ID ${editingId}`}
+        </h2>
 
-        <div style={{ display: "grid", gap: 8, maxWidth: 420 }}>
-          <input name="nombre" placeholder="Nombre *" value={form.nombre} onChange={onChange} />
-          <input name="marca" placeholder="Marca" value={form.marca} onChange={onChange} />
-          <input name="categoria" placeholder="Categoría" value={form.categoria} onChange={onChange} />
-          <input name="precio" placeholder="Precio *" value={form.precio} onChange={onChange} inputMode="decimal" />
-          <input name="stock" placeholder="Stock" value={form.stock} onChange={onChange} inputMode="numeric" />
-          <input
-            name="stockMinimo"
-            placeholder="Stock mínimo"
-            value={form.stockMinimo}
-            onChange={onChange}
-            inputMode="numeric"
-          />
+        <form onSubmit={onSubmit}>
+          <div className="grid2">
+            <div>
+              <label className="label">Nombre *</label>
+              <input
+                className="input"
+                name="nombre"
+                value={form.nombre}
+                onChange={onChange}
+                placeholder="Ej: Lámpara LED"
+              />
+            </div>
 
-          <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <input type="checkbox" name="activo" checked={form.activo} onChange={onChange} />
-            Activo
-          </label>
+            <div>
+              <label className="label">Precio *</label>
+              <input
+                className="input"
+                name="precio"
+                value={form.precio}
+                onChange={onChange}
+                placeholder="Ej: 3500"
+                inputMode="decimal"
+              />
+            </div>
 
-          <div style={{ display: "flex", gap: 8 }}>
-            <button type="submit">{editingId === null ? "Crear" : "Guardar cambios"}</button>
-            {editingId !== null && (
-              <button type="button" onClick={resetForm}>
-                Cancelar
-              </button>
-            )}
+            <div>
+              <label className="label">Marca</label>
+              <input
+                className="input"
+                name="marca"
+                value={form.marca}
+                onChange={onChange}
+                placeholder="Ej: Ferrolux"
+              />
+            </div>
+
+            <div>
+              <label className="label">Categoría</label>
+              <input
+                className="input"
+                name="categoria"
+                value={form.categoria}
+                onChange={onChange}
+                placeholder="Ej: Iluminación"
+              />
+            </div>
+
+            <div>
+              <label className="label">Stock</label>
+              <input
+                className="input"
+                name="stock"
+                value={form.stock}
+                onChange={onChange}
+                placeholder="Ej: 10"
+                inputMode="numeric"
+              />
+            </div>
+
+            <div>
+              <label className="label">Stock mínimo</label>
+              <input
+                className="input"
+                name="stockMinimo"
+                value={form.stockMinimo}
+                onChange={onChange}
+                placeholder="Ej: 3"
+                inputMode="numeric"
+              />
+            </div>
           </div>
-        </div>
-      </form>
 
-      <h2>Listado</h2>
+          <div className="row mt12" style={{ justifyContent: "space-between" }}>
+            <label className="checkboxRow">
+              <input type="checkbox" name="activo" checked={form.activo} onChange={onChange} />
+              Activo
+            </label>
 
-      {loading ? (
-        <p>Cargando...</p>
-      ) : productos.length === 0 ? (
-        <p>No hay productos.</p>
+            <div className="row">
+              <button className="btn btnPrimary" type="submit">
+                {editingId === null ? "Crear" : "Guardar cambios"}
+              </button>
+
+              {editingId !== null && (
+                <button className="btn btnGhost" type="button" onClick={resetForm}>
+                  Cancelar
+                </button>
+              )}
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div className="row mt12" style={{ justifyContent: "space-between" }}>
+        <h2 className="m0">Listado</h2>
+        {loading && <small style={{ color: "var(--muted)" }}>Cargando...</small>}
+      </div>
+
+      {!loading && productos.length === 0 ? (
+        <p className="mt12">No hay productos.</p>
       ) : (
-        <table border="1" cellPadding="8" style={{ borderCollapse: "collapse", width: "100%" }}>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Marca</th>
-              <th>Categoría</th>
-              <th>Precio</th>
-              <th>Stock</th>
-              <th>Min</th>
-              <th>Activo</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {productos.map((p) => (
-              <tr key={p.id}>
-                <td>{p.id}</td>
-                <td>{p.nombre}</td>
-                <td>{p.marca ?? "-"}</td>
-                <td>{p.categoria ?? "-"}</td>
-                <td>{p.precio}</td>
-                <td>{p.stock}</td>
-                <td>{p.stockMinimo}</td>
-                <td>{p.activo ? "Sí" : "No"}</td>
-                <td style={{ display: "flex", gap: 8 }}>
-                  <button type="button" onClick={() => onEditarClick(p)}>
-                    Editar
-                  </button>
-                  <button type="button" onClick={() => onEliminarClick(p)}>
-                    Eliminar
-                  </button>
-                </td>
+        <div className="tableWrap mt12">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Marca</th>
+                <th>Categoría</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Mín</th>
+                <th>Activo</th>
+                <th>Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {productos.map((p) => (
+                <tr key={p.id}>
+                  <td>{p.id}</td>
+                  <td>{p.nombre}</td>
+                  <td>{p.marca ?? "-"}</td>
+                  <td>{p.categoria ?? "-"}</td>
+                  <td>${p.precio}</td>
+                  <td>{p.stock}</td>
+                  <td>{p.stockMinimo}</td>
+                  <td>{p.activo ? "Sí" : "No"}</td>
+                  <td>
+                    <div className="row">
+                      <button className="btn btnSm" type="button" onClick={() => onEditarClick(p)}>
+                        Editar
+                      </button>
+                      <button className="btn btnDanger btnSm" type="button" onClick={() => onEliminarClick(p)}>
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {loading && (
+                <tr>
+                  <td colSpan="9">Cargando...</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
