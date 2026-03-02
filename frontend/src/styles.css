@@ -642,3 +642,58 @@ body {
     white-space: nowrap;
   }
 }
+
+@media (max-width: 600px) {
+
+  /* La fila final (total + checkbox + botón) que se acomode mejor */
+  .row {
+    align-items: flex-start;
+  }
+
+  /* Para que el checkbox no quede pegado */
+  .checkboxRow {
+    width: 100%;
+  }
+
+  /* Botón principal a ancho completo cuando conviene */
+  .btnPrimary {
+    width: 100%;
+  }
+}
+
+/* ============================
+   Extras (pegarlos al FINAL)
+   ============================ */
+
+/* 1) Mejor experiencia de tablas en mobile */
+@media (max-width: 600px) {
+
+  .table th,
+  .table td {
+    padding: 9px 10px;
+  }
+
+  .table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+}
+
+/* 2) Botón principal full-width en mobile */
+@media (max-width: 600px) {
+  .btnPrimary {
+    width: 100%;
+  }
+}
+
+/* 3) Quitar flechas en inputs number (opcional) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  appearance: textfield;
+}

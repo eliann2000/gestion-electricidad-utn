@@ -207,6 +207,7 @@ export default function ProductosPage() {
                 className="input"
                 type="number"
                 min="0"
+                step="0.01"
                 name="precio"
                 value={form.precio}
                 onChange={onChange}
@@ -280,7 +281,7 @@ export default function ProductosPage() {
               </button>
 
               {editingId !== null && (
-                <button className="btn btnGhost" type="button" onClick={resetForm}>
+                <button className="btn btnNeutral" type="button" onClick={resetForm}>
                   Cancelar
                 </button>
               )}
@@ -357,7 +358,7 @@ export default function ProductosPage() {
                   <td>{p.activo ? "Sí" : "No"}</td>
                   <td>
                     <div className="row">
-                      <button className="btn btnSm" type="button" onClick={() => onEditarClick(p)}>
+                      <button className="btn btnNeutral btnSm" type="button" onClick={() => onEditarClick(p)}>
                         Editar
                       </button>
                       <button className="btn btnDanger btnSm" type="button" onClick={() => onEliminarClick(p)}>

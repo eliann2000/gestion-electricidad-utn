@@ -29,7 +29,7 @@ export default function StockBajoPage() {
         <div>
           <h1 className="m0">Reporte: Stock bajo</h1>
           <p className="m0" style={{ color: "var(--muted)", marginTop: 6 }}>
-            Productos con <b>stock ≤ stock mínimo</b>.
+            Productos con <b>stock mínimo</b>.
           </p>
         </div>
       </div>
@@ -46,7 +46,7 @@ export default function StockBajoPage() {
         </p>
       ) : items.length === 0 ? (
         <div className="alert alertOk mt12">
-          <b>OK:</b> No hay productos con stock bajo 🎉
+          <b>OK:</b> No hay productos con stock mínimo.
         </div>
       ) : (
         <>

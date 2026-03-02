@@ -284,10 +284,12 @@ export default function NuevaVentaPage() {
             <label className="label">Cantidad</label>
             <input
               className="input"
+              type="number"
+              min="1"
+              step="1"
               value={cantidad}
               onChange={(e) => setCantidad(e.target.value)}
               placeholder="Ej: 1"
-              inputMode="numeric"
             />
           </div>
         </div>
@@ -398,7 +400,7 @@ export default function NuevaVentaPage() {
 
           {/* ✅ NUEVO: checkbox + botón */}
           <div className="row" style={{ gap: 12, alignItems: "center" }}>
-            <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <label className="checkboxRow">
               <input
                 type="checkbox"
                 checked={enviarEmail}

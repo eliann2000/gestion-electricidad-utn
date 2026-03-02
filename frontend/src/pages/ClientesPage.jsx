@@ -171,6 +171,7 @@ export default function ClientesPage() {
               <label className="label">Teléfono *</label>
               <input
                 className="input"
+                type="tel"
                 name="telefono"
                 placeholder="Ej: 3515551234"
                 value={form.telefono}
@@ -183,11 +184,11 @@ export default function ClientesPage() {
               <label className="label">Email *</label>
               <input
                 className="input"
+                type="email"
                 name="email"
                 placeholder="Ej: juan@gmail.com"
                 value={form.email}
                 onChange={onChange}
-                inputMode="email"
               />
             </div>
 
@@ -210,7 +211,7 @@ export default function ClientesPage() {
               </button>
 
               {editingId !== null && (
-                <button className="btn btnGhost" type="button" onClick={resetForm}>
+                <button className="btn btnNeutral" type="button" onClick={resetForm}>
                   Cancelar
                 </button>
               )}
@@ -264,7 +265,7 @@ export default function ClientesPage() {
                   <td>{c.direccion ?? "-"}</td>
                   <td>
                     <div className="row">
-                      <button className="btn btnSm" type="button" onClick={() => onEditarClick(c)}>
+                      <button className="btn btnNeutral btnSm" type="button" onClick={() => onEditarClick(c)}>
                         Editar
                       </button>
                       <button className="btn btnDanger btnSm" type="button" onClick={() => onEliminarClick(c)}>
