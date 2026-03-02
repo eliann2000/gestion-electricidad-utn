@@ -13,11 +13,45 @@ body,
   height: 100%;
 }
 
+:root {
+  --bg: #f6f7fb;
+  --card: rgba(255, 255, 255, 0.92);
+  --text: #0f172a;
+  --muted: #64748b;
+
+  --border: rgba(15, 23, 42, 0.10);
+
+  --primary: #2563eb;
+  --primary-2: #1d4ed8;
+
+  --danger: #dc2626;
+  --danger-2: #b91c1c;
+
+  --ok: #16a34a;
+
+  --shadow: 0 14px 34px rgba(15, 23, 42, 0.10);
+  --shadow-sm: 0 8px 18px rgba(15, 23, 42, 0.08);
+
+  --radius: 14px;
+  --radius-sm: 12px;
+
+  --ring: 0 0 0 4px rgba(37, 99, 235, 0.14);
+}
+
+/* ===== Base typography + background ===== */
 body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: var(--text);
+
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(37, 99, 235, 0.14), transparent 60%),
+    radial-gradient(900px 500px at 90% 0%, rgba(245, 158, 11, 0.12), transparent 60%),
+    radial-gradient(700px 450px at 40% 110%, rgba(22, 163, 74, 0.10), transparent 60%),
+    var(--bg);
 }
 
 h1 {
@@ -49,43 +83,7 @@ p {
   font-size: 14px;
 }
 
-/* ===== Theme ===== */
-:root {
-  --bg: #f6f7fb;
-  --card: rgba(255, 255, 255, 0.92);
-  --text: #0f172a;
-  --muted: #64748b;
-
-  --border: rgba(15, 23, 42, 0.10);
-
-  --primary: #2563eb;
-  --primary-2: #1d4ed8;
-
-  --danger: #dc2626;
-  --danger-2: #b91c1c;
-
-  --ok: #16a34a;
-
-  --shadow: 0 14px 34px rgba(15, 23, 42, 0.10);
-  --shadow-sm: 0 8px 18px rgba(15, 23, 42, 0.08);
-
-  --radius: 14px;
-  --radius-sm: 12px;
-
-  --ring: 0 0 0 4px rgba(37, 99, 235, 0.14);
-}
-
-/* ===== Global background ===== */
-body {
-  color: var(--text);
-  background:
-    radial-gradient(1200px 600px at 20% -10%, rgba(37, 99, 235, 0.14), transparent 60%),
-    radial-gradient(900px 500px at 90% 0%, rgba(245, 158, 11, 0.12), transparent 60%),
-    radial-gradient(700px 450px at 40% 110%, rgba(22, 163, 74, 0.10), transparent 60%),
-    var(--bg);
-}
-
-/* ========== Layout ========== */
+/* ========== Layout (legacy header/nav) ========== */
 .app {
   min-height: 100vh;
 }
@@ -153,6 +151,8 @@ body {
 .cardTitle {
   margin: 0 0 12px 0;
   font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
 }
 
 .cardFlat {
@@ -215,6 +215,13 @@ body {
   color: rgba(100, 116, 139, 0.75);
 }
 
+.checkboxRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--muted);
+}
+
 /* ========== Buttons ========== */
 .btn {
   border: 1px solid var(--border);
@@ -254,7 +261,7 @@ body {
   font-size: 13px;
 }
 
-/* Primary */
+/* Variants */
 .btnPrimary {
   background: linear-gradient(180deg, var(--primary), var(--primary-2));
   border-color: var(--primary-2);
@@ -265,7 +272,6 @@ body {
   filter: brightness(1.02);
 }
 
-/* Danger */
 .btnDanger {
   background: linear-gradient(180deg, var(--danger), var(--danger-2));
   border-color: var(--danger-2);
@@ -276,7 +282,6 @@ body {
   filter: brightness(1.02);
 }
 
-/* Warning (ámbar) */
 .btnWarning {
   background: linear-gradient(180deg, #f59e0b, #d97706);
   border-color: #d97706;
@@ -287,7 +292,6 @@ body {
   filter: brightness(1.02);
 }
 
-/* Neutral */
 .btnNeutral {
   background: #f1f5f9;
   border-color: rgba(15, 23, 42, 0.12);
@@ -372,76 +376,9 @@ body {
   margin-bottom: 12px;
 }
 
-/* ========== Responsive ========== */
-@media (max-width: 900px) {
-  .headerInner {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-
-  .nav {
-    justify-content: flex-start;
-  }
-
-  .nav button {
-    flex: 1 1 auto;
-  }
-
-  .grid2 {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 600px) {
-  .main {
-    padding: 14px 12px 24px;
-  }
-
-  .card {
-    padding: 12px;
-    border-radius: 12px;
-  }
-
-  .brand h2 {
-    font-size: 15px;
-  }
-
-  .row {
-    gap: 8px;
-  }
-
-  .input,
-  .select {
-    padding: 9px 10px;
-    border-radius: 10px;
-  }
-
-  .tableWrap {
-    border-radius: 12px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .btnSm {
-    padding: 7px 9px;
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 420px) {
-  .rowNoWrap {
-    flex-wrap: wrap;
-  }
-
-  .nav button {
-    width: 100%;
-  }
-}
-
 /* ===============================
    Layout profesional con sidebar
    =============================== */
-
 .layout {
   display: flex;
   min-height: 100vh;
@@ -501,25 +438,38 @@ body {
   padding: 32px;
 }
 
-.cardTitle {
-  font-weight: 600;
-  letter-spacing: -0.2px;
-}
-
 /* =========================================================
-   Responsive FIX (sidebar -> topbar + content full width)
-   Pegar AL FINAL del styles.css
+   Responsive (sidebar -> topbar + content full width)
    ========================================================= */
 
+/* 900px */
 @media (max-width: 900px) {
 
-  /* Layout pasa a columna */
+  /* legacy header */
+  .headerInner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .nav {
+    justify-content: flex-start;
+  }
+
+  .nav button {
+    flex: 1 1 auto;
+  }
+
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+
+  /* sidebar layout -> topbar */
   .layout {
     flex-direction: column;
     min-height: 100vh;
   }
 
-  /* Sidebar arriba como header */
   .sidebar {
     width: 100%;
     padding: 12px 12px;
@@ -529,11 +479,12 @@ body {
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.20);
   }
 
-  /* Encabezado del sidebar en una fila */
+  /* Mobile header: todo en una línea (la versión final que te gustó) */
   .sidebarHeader {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
     gap: 10px;
     margin-bottom: 10px;
   }
@@ -545,11 +496,11 @@ body {
 
   .sidebarHeader small {
     font-size: 12px;
-    opacity: 0.75;
+    color: rgba(255, 255, 255, 0.80);
+    opacity: 1;
     white-space: nowrap;
   }
 
-  /* Menú en grilla: 2 columnas */
   .sidebarNav {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -560,32 +511,31 @@ body {
     width: 100%;
     padding: 10px 10px;
     border-radius: 12px;
-    text-align: left;
   }
 
-  /* Contenido a full ancho */
   .content {
     width: 100%;
     max-width: none;
     padding: 14px 12px 24px;
   }
 
-  /* Tu main (si lo seguís usando en algún lado) */
   .main {
     max-width: none;
     padding: 0;
   }
 }
 
+/* 600px */
 @media (max-width: 600px) {
+  .main {
+    padding: 14px 12px 24px;
+  }
 
-  /* Cards más compactas */
   .card {
     padding: 12px;
     border-radius: 14px;
   }
 
-  /* Tipos más cómodos */
   h1 {
     font-size: 22px;
   }
@@ -598,79 +548,41 @@ body {
     font-size: 14px;
   }
 
-  /* Inputs y selects full */
+  .row {
+    gap: 8px;
+    align-items: flex-start;
+    /* tu mejora para filas apretadas */
+  }
+
   .input,
   .select {
     padding: 10px 12px;
     border-radius: 12px;
   }
 
-  /* Botones grandes y fáciles de tocar */
   .btn {
     padding: 11px 12px;
     border-radius: 12px;
   }
 
-  /* Tablas: asegurá scroll horizontal (ya lo tenés, lo refuerzo) */
-  .tableWrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-@media (max-width: 420px) {
-
-  /* Menú 1 columna si es muy chico */
-  .sidebarNav {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ===== Mobile header: todo en una línea ===== */
-@media (max-width: 900px) {
-  .sidebarHeader {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 10px;
-  }
-
-  .sidebarHeader small {
-    color: rgba(255, 255, 255, 0.80);
-    opacity: 1;
-    white-space: nowrap;
-  }
-}
-
-@media (max-width: 600px) {
-
-  /* La fila final (total + checkbox + botón) que se acomode mejor */
-  .row {
-    align-items: flex-start;
-  }
-
-  /* Para que el checkbox no quede pegado */
   .checkboxRow {
     width: 100%;
   }
 
-  /* Botón principal a ancho completo cuando conviene */
   .btnPrimary {
     width: 100%;
   }
-}
 
-/* ============================
-   Extras (pegarlos al FINAL)
-   ============================ */
-
-/* 1) Mejor experiencia de tablas en mobile */
-@media (max-width: 600px) {
+  .tableWrap {
+    border-radius: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 
   .table th,
   .table td {
     padding: 9px 10px;
+    /* extra */
   }
 
   .table thead th {
@@ -678,16 +590,29 @@ body {
     top: 0;
     z-index: 1;
   }
-}
 
-/* 2) Botón principal full-width en mobile */
-@media (max-width: 600px) {
-  .btnPrimary {
-    width: 100%;
+  .btnSm {
+    padding: 7px 9px;
+    font-size: 12px;
   }
 }
 
-/* 3) Quitar flechas en inputs number (opcional) */
+/* 420px */
+@media (max-width: 420px) {
+  .rowNoWrap {
+    flex-wrap: wrap;
+  }
+
+  .nav button {
+    width: 100%;
+  }
+
+  .sidebarNav {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Quitar flechas en inputs number (opcional) ===== */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
