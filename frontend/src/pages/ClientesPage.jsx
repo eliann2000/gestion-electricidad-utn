@@ -1,5 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { clientesApi } from "../services/clientes";
+
+import ClienteForm from "../components/clientes/ClienteForm";
+import ClientesToolbar from "../components/clientes/ClientesToolbar";
+import ClientesTable from "../components/clientes/ClientesTable";
+import ClientesListadoHeader from "../components/clientes/ClientesListadoHeader";
+
+const initialForm = {
+  nombre: "",
+  apellido: "",
+  telefono: "",
+  email: "",
+  direccion: "",
+};
 
 export default function ClientesPage() {
   const [clientes, setClientes] = useState([]);
@@ -7,26 +20,12 @@ export default function ClientesPage() {
   const [error, setError] = useState("");
 
   const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState(initialForm);
 
-  const [form, setForm] = useState({
-    nombre: "",
-    apellido: "",
-    telefono: "",
-    email: "",
-    direccion: "",
-  });
-
-  // ✅ buscador
   const [filtro, setFiltro] = useState("");
 
   function resetForm() {
-    setForm({
-      nombre: "",
-      apellido: "",
-      telefono: "",
-      email: "",
-      direccion: "",
-    });
+    setForm(initialForm);
     setEditingId(null);
   }
 
@@ -49,10 +48,7 @@ export default function ClientesPage() {
 
   function onChange(e) {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   }
 
   function buildBodyFromForm() {
@@ -77,11 +73,9 @@ export default function ClientesPage() {
     if (!body.email) return setError("El email es obligatorio");
 
     try {
-      if (editingId === null) {
-        await clientesApi.create(body);
-      } else {
-        await clientesApi.update(editingId, body);
-      }
+      if (editingId === null) await clientesApi.create(body);
+      else await clientesApi.update(editingId, body);
+
       resetForm();
       await cargarClientes();
     } catch (e) {
@@ -115,22 +109,17 @@ export default function ClientesPage() {
     }
   }
 
-  // ✅ lista filtrada por nombre/apellido
-  const clientesFiltrados = clientes.filter((c) => {
-    const texto = `${c.nombre ?? ""} ${c.apellido ?? ""}`.toLowerCase();
-    return texto.includes(filtro.toLowerCase());
-  });
+  const clientesFiltrados = useMemo(() => {
+    const filtroLower = filtro.toLowerCase();
+    return clientes.filter((c) => {
+      const texto = `${c.nombre ?? ""} ${c.apellido ?? ""}`.toLowerCase();
+      return texto.includes(filtroLower);
+    });
+  }, [clientes, filtro]);
 
   return (
     <div className="card">
-      <div className="row" style={{ justifyContent: "space-between" }}>
-        <div>
-          <h1 className="m0">Clientes</h1>
-          <p className="m0" style={{ color: "var(--muted)", marginTop: 6 }}>
-            Total: <b>{clientesFiltrados.length}</b>
-          </p>
-        </div>
-      </div>
+      <ClientesToolbar total={clientesFiltrados.length} />
 
       {error && (
         <div className="alert alertError mt12">
@@ -138,153 +127,26 @@ export default function ClientesPage() {
         </div>
       )}
 
-      <div className="mt12 card cardFlat">
-        <h2 className="cardTitle">
-          {editingId === null ? "Nuevo cliente" : `Editando cliente ID ${editingId}`}
-        </h2>
+      <ClienteForm
+        editingId={editingId}
+        form={form}
+        onChange={onChange}
+        onSubmit={onSubmit}
+        resetForm={resetForm}
+      />
 
-        <form onSubmit={onSubmit}>
-          <div className="grid2">
-            <div>
-              <label className="label">Nombre *</label>
-              <input
-                className="input"
-                name="nombre"
-                placeholder="Ej: Juan"
-                value={form.nombre}
-                onChange={onChange}
-              />
-            </div>
+      <ClientesListadoHeader
+        loading={loading}
+        filtro={filtro}
+        setFiltro={setFiltro}
+      />
 
-            <div>
-              <label className="label">Apellido *</label>
-              <input
-                className="input"
-                name="apellido"
-                placeholder="Ej: Pérez"
-                value={form.apellido}
-                onChange={onChange}
-              />
-            </div>
-
-            <div>
-              <label className="label">Teléfono *</label>
-              <input
-                className="input"
-                type="tel"
-                name="telefono"
-                placeholder="Ej: 3515551234"
-                value={form.telefono}
-                onChange={onChange}
-                inputMode="numeric"
-              />
-            </div>
-
-            <div>
-              <label className="label">Email *</label>
-              <input
-                className="input"
-                type="email"
-                name="email"
-                placeholder="Ej: juan@gmail.com"
-                value={form.email}
-                onChange={onChange}
-              />
-            </div>
-
-            <div>
-              <label className="label">Dirección</label>
-              <input
-                className="input"
-                name="direccion"
-                placeholder="Ej: Córdoba"
-                value={form.direccion}
-                onChange={onChange}
-              />
-            </div>
-          </div>
-
-          <div className="row mt12" style={{ justifyContent: "flex-end" }}>
-            <div className="row">
-              <button className="btn btnPrimary" type="submit">
-                {editingId === null ? "Crear" : "Guardar cambios"}
-              </button>
-
-              {editingId !== null && (
-                <button className="btn btnNeutral" type="button" onClick={resetForm}>
-                  Cancelar
-                </button>
-              )}
-            </div>
-          </div>
-        </form>
-      </div>
-
-      <div className="row mt12" style={{ justifyContent: "space-between" }}>
-        <h2 className="m0">Listado</h2>
-        {loading && <small style={{ color: "var(--muted)" }}>Cargando...</small>}
-      </div>
-
-      {/* ✅ buscador */}
-      <div className="row mt12" style={{ gap: 12, flexWrap: "wrap" }}>
-        <div style={{ flex: "1 1 280px" }}>
-          <label className="label">Buscar por nombre o apellido</label>
-          <input
-            className="input"
-            value={filtro}
-            onChange={(e) => setFiltro(e.target.value)}
-            placeholder="Ej: juan o pérez"
-          />
-        </div>
-      </div>
-
-      {!loading && clientesFiltrados.length === 0 ? (
-        <p className="mt12">No hay clientes que coincidan con la búsqueda.</p>
-      ) : (
-        <div className="tableWrap mt12">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Cliente</th>
-                <th>Teléfono</th>
-                <th>Email</th>
-                <th>Dirección</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clientesFiltrados.map((c) => (
-                <tr key={c.id}>
-                  <td>{c.id}</td>
-                  <td>
-                    {c.nombre} {c.apellido}
-                  </td>
-                  <td>{c.telefono}</td>
-                  <td>{c.email}</td>
-                  <td>{c.direccion ?? "-"}</td>
-                  <td>
-                    <div className="row">
-                      <button className="btn btnNeutral btnSm" type="button" onClick={() => onEditarClick(c)}>
-                        Editar
-                      </button>
-                      <button className="btn btnDanger btnSm" type="button" onClick={() => onEliminarClick(c)}>
-                        Eliminar
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-
-              {loading && (
-                <tr>
-                  <td colSpan="6">Cargando...</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <ClientesTable
+        clientes={clientesFiltrados}
+        loading={loading}
+        onEditarClick={onEditarClick}
+        onEliminarClick={onEliminarClick}
+      />
     </div>
   );
 }
