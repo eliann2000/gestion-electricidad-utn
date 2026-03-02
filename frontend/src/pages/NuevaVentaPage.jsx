@@ -3,6 +3,9 @@ import { clientesApi } from "../services/clientes";
 import { productosApi } from "../services/productos";
 import { ventasApi } from "../services/ventas";
 
+// ✅ NUEVO: import del componente modularizado (solo carrito)
+import CarritoTable from "../components/ventas/CarritoTable";
+
 export default function NuevaVentaPage() {
   const [clientes, setClientes] = useState([]);
   const [productos, setProductos] = useState([]);
@@ -16,7 +19,7 @@ export default function NuevaVentaPage() {
   const [okMsg, setOkMsg] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // ✅ NUEVO: checkbox para enviar email
+  // ✅ checkbox para enviar email
   const [enviarEmail, setEnviarEmail] = useState(false);
 
   // Edición por fila del carrito
@@ -179,13 +182,9 @@ export default function NuevaVentaPage() {
     };
 
     try {
-      // 1) Crear venta
       const venta = await ventasApi.create(body);
 
-      // 2) Si está tildado, enviar correo
       if (enviarEmail) {
-        // Si no hay cliente seleccionado, probablemente no haya email en backend.
-        // Para MVP: pedimos email manual solo cuando no hay cliente.
         let to;
         if (!clienteId) {
           to = window.prompt("Ingresá el email destino para enviar el comprobante:");
@@ -203,18 +202,16 @@ export default function NuevaVentaPage() {
         if (!resp.ok) throw new Error(data.message || "Error enviando correo");
       }
 
-      // 3) Mensaje OK
       setOkMsg(
         enviarEmail
           ? `Venta creada (ID ${venta.id}) - Total: ${venta.total}. Correo enviado ✅`
           : `Venta creada (ID ${venta.id}) - Total: ${venta.total}`
       );
 
-      // 4) Limpiar UI
       setItems([]);
       setClienteId("");
       cancelarEdicion();
-      setEnviarEmail(false); // opcional: lo destildamos para la próxima venta
+      setEnviarEmail(false);
       await cargarData();
     } catch (e) {
       setError(e.message);
@@ -301,119 +298,38 @@ export default function NuevaVentaPage() {
         </div>
       </div>
 
-      <div className="mt12">
-        <div className="row" style={{ justifyContent: "space-between" }}>
-          <h2 className="m0">Carrito</h2>
-          <p className="m0" style={{ color: "var(--muted)" }}>
-            Items: <b>{items.length}</b>
-          </p>
-        </div>
+      {/* ✅ SOLO MODULARIZADO: el carrito */}
+      <CarritoTable
+        items={items}
+        productos={productos}
+        editRowPid={editRowPid}
+        editProductoId={editProductoId}
+        editCantidad={editCantidad}
+        setEditProductoId={setEditProductoId}
+        setEditCantidad={setEditCantidad}
+        iniciarEdicion={iniciarEdicion}
+        guardarEdicion={guardarEdicion}
+        cancelarEdicion={cancelarEdicion}
+        quitarItem={quitarItem}
+      />
 
-        {items.length === 0 ? (
-          <p className="mt12">No hay items.</p>
-        ) : (
-          <div className="tableWrap mt12">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Precio</th>
-                  <th>Cantidad</th>
-                  <th>Subtotal</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((it) => (
-                  <tr key={it.productoId}>
-                    <td>
-                      {it.productoId} - {it.nombre}
-                    </td>
-                    <td>${it.precio}</td>
+      <div className="row mt12" style={{ justifyContent: "space-between", alignItems: "center" }}>
+        <h3 className="m0">Total: ${total}</h3>
 
-                    <td>
-                      {editRowPid === it.productoId ? (
-                        <input
-                          className="input"
-                          style={{ width: 110 }}
-                          inputMode="numeric"
-                          value={editCantidad}
-                          onChange={(e) => setEditCantidad(e.target.value)}
-                        />
-                      ) : (
-                        it.cantidad
-                      )}
-                    </td>
+        <div className="row" style={{ gap: 12, alignItems: "center" }}>
+          <label className="checkboxRow">
+            <input
+              type="checkbox"
+              checked={enviarEmail}
+              onChange={(e) => setEnviarEmail(e.target.checked)}
+              disabled={items.length === 0}
+            />
+            Enviar comprobante por email
+          </label>
 
-                    <td>${it.subtotal}</td>
-
-                    <td>
-                      {editRowPid === it.productoId ? (
-                        <div className="row" style={{ alignItems: "center" }}>
-                          <select
-                            className="select"
-                            style={{ width: "min(260px, 60vw)" }}
-                            value={editProductoId}
-                            onChange={(e) => setEditProductoId(e.target.value)}
-                          >
-                            {productos.map((p) => (
-                              <option key={p.id} value={p.id}>
-                                {p.id} - {p.nombre} (stock {p.stock}) - ${p.precio}
-                              </option>
-                            ))}
-                          </select>
-
-                          {/* Guardar y Cancelar juntos, sin wrap */}
-                          <div className="rowNoWrap">
-                            <button className="btn btnPrimary btnSm" type="button" onClick={guardarEdicion}>
-                              Guardar
-                            </button>
-                            <button className="btn btnNeutral btnSm" type="button" onClick={cancelarEdicion}>
-                              Cancelar
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="row">
-                          <button className="btn btnWarning btnSm" type="button" onClick={() => iniciarEdicion(it)}>
-                            Modificar
-                          </button>
-                          <button
-                            className="btn btnDanger btnSm"
-                            type="button"
-                            onClick={() => quitarItem(it.productoId)}
-                          >
-                            Quitar
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        <div className="row mt12" style={{ justifyContent: "space-between", alignItems: "center" }}>
-          <h3 className="m0">Total: ${total}</h3>
-
-          {/* ✅ NUEVO: checkbox + botón */}
-          <div className="row" style={{ gap: 12, alignItems: "center" }}>
-            <label className="checkboxRow">
-              <input
-                type="checkbox"
-                checked={enviarEmail}
-                onChange={(e) => setEnviarEmail(e.target.checked)}
-                disabled={items.length === 0}
-              />
-              Enviar comprobante por email
-            </label>
-
-            <button className="btn btnPrimary" type="button" onClick={registrarVenta} disabled={items.length === 0}>
-              Registrar venta
-            </button>
-          </div>
+          <button className="btn btnPrimary" type="button" onClick={registrarVenta} disabled={items.length === 0}>
+            Registrar venta
+          </button>
         </div>
       </div>
     </div>

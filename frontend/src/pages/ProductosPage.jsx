@@ -1,5 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { productosApi } from "../services/productos";
+
+import ProductoForm from "../components/productos/ProductoForm";
+import ProductosTable from "../components/productos/ProductosTable";
+
+const initialForm = {
+  nombre: "",
+  marca: "",
+  categoria: "",
+  precio: "",
+  stock: "",
+  stockMinimo: "",
+  activo: true,
+};
 
 export default function ProductosPage() {
   const [productos, setProductos] = useState([]);
@@ -7,32 +20,14 @@ export default function ProductosPage() {
   const [error, setError] = useState("");
 
   const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState(initialForm);
 
-  const [form, setForm] = useState({
-    nombre: "",
-    marca: "",
-    categoria: "",
-    precio: "",
-    stock: "",
-    stockMinimo: "",
-    activo: true,
-  });
-
-  // ✅ filtros del listado
   const [filtroNombre, setFiltroNombre] = useState("");
   const [filtroMarca, setFiltroMarca] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("todos"); // todos | activos | inactivos
 
   function resetForm() {
-    setForm({
-      nombre: "",
-      marca: "",
-      categoria: "",
-      precio: "",
-      stock: "",
-      stockMinimo: "",
-      activo: true,
-    });
+    setForm(initialForm);
     setEditingId(null);
   }
 
@@ -55,10 +50,7 @@ export default function ProductosPage() {
 
   function onChange(e) {
     const { name, value, type, checked } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   }
 
   function buildBodyFromForm() {
@@ -80,25 +72,15 @@ export default function ProductosPage() {
     const body = buildBodyFromForm();
 
     if (!body.nombre) return setError("El nombre es obligatorio");
-
-    if (!Number.isFinite(body.precio) || body.precio < 0) {
-      return setError("El precio debe ser 0 o mayor");
-    }
-
-    if (!Number.isFinite(body.stock) || body.stock < 0) {
-      return setError("El stock debe ser un número mayor o igual a 0");
-    }
-
-    if (!Number.isFinite(body.stockMinimo) || body.stockMinimo < 0) {
+    if (!Number.isFinite(body.precio) || body.precio < 0) return setError("El precio debe ser 0 o mayor");
+    if (!Number.isFinite(body.stock) || body.stock < 0) return setError("El stock debe ser un número mayor o igual a 0");
+    if (!Number.isFinite(body.stockMinimo) || body.stockMinimo < 0)
       return setError("El stock mínimo debe ser un número mayor o igual a 0");
-    }
 
     try {
-      if (editingId === null) {
-        await productosApi.create(body);
-      } else {
-        await productosApi.update(editingId, body);
-      }
+      if (editingId === null) await productosApi.create(body);
+      else await productosApi.update(editingId, body);
+
       resetForm();
       await cargarProductos();
     } catch (e) {
@@ -132,39 +114,36 @@ export default function ProductosPage() {
     } catch (e) {
       const msg = String(e?.message || "");
 
-      // Si el backend te devuelve el mensaje nuevo (409) o si por alguna razón llega el error viejo
       if (
         msg.includes("No se puede eliminar este producto") ||
         msg.includes("P2003") ||
         msg.toLowerCase().includes("foreign key") ||
         msg.toLowerCase().includes("constraint")
       ) {
-        return setError(
-          "No se puede eliminar este producto porque ya fue utilizado en una venta. "
-        );
+        return setError("No se puede eliminar este producto porque ya fue utilizado en una venta. ");
       }
 
       setError(msg || "Error al eliminar el producto");
     }
   }
 
-  // ✅ lista filtrada
-  const productosFiltrados = productos.filter((p) => {
-    const nombre = (p.nombre ?? "").toLowerCase();
-    const marca = (p.marca ?? "").toLowerCase();
+  const productosFiltrados = useMemo(() => {
+    const n = filtroNombre.toLowerCase();
+    const m = filtroMarca.toLowerCase();
 
-    const okNombre = nombre.includes(filtroNombre.toLowerCase());
-    const okMarca = marca.includes(filtroMarca.toLowerCase());
+    return productos.filter((p) => {
+      const nombre = (p.nombre ?? "").toLowerCase();
+      const marca = (p.marca ?? "").toLowerCase();
 
-    const okEstado =
-      filtroEstado === "todos"
-        ? true
-        : filtroEstado === "activos"
-          ? !!p.activo
-          : !p.activo;
+      const okNombre = nombre.includes(n);
+      const okMarca = marca.includes(m);
 
-    return okNombre && okMarca && okEstado;
-  });
+      const okEstado =
+        filtroEstado === "todos" ? true : filtroEstado === "activos" ? !!p.activo : !p.activo;
+
+      return okNombre && okMarca && okEstado;
+    });
+  }, [productos, filtroNombre, filtroMarca, filtroEstado]);
 
   return (
     <div className="card">
@@ -183,138 +162,28 @@ export default function ProductosPage() {
         </div>
       )}
 
-      <div className="mt12 card cardFlat">
-        <h2 className="cardTitle">
-          {editingId === null ? "Nuevo producto" : `Editando producto ID ${editingId}`}
-        </h2>
-
-        <form onSubmit={onSubmit}>
-          <div className="grid2">
-            <div>
-              <label className="label">Nombre *</label>
-              <input
-                className="input"
-                name="nombre"
-                value={form.nombre}
-                onChange={onChange}
-                placeholder="Ej: Lámpara LED"
-              />
-            </div>
-
-            <div>
-              <label className="label">Precio *</label>
-              <input
-                className="input"
-                type="number"
-                min="0"
-                step="0.01"
-                name="precio"
-                value={form.precio}
-                onChange={onChange}
-                placeholder="Ej: 3500"
-                inputMode="decimal"
-              />
-            </div>
-
-            <div>
-              <label className="label">Marca</label>
-              <input
-                className="input"
-                name="marca"
-                value={form.marca}
-                onChange={onChange}
-                placeholder="Ej: Ferrolux"
-              />
-            </div>
-
-            <div>
-              <label className="label">Categoría</label>
-              <input
-                className="input"
-                name="categoria"
-                value={form.categoria}
-                onChange={onChange}
-                placeholder="Ej: Iluminación"
-              />
-            </div>
-
-            <div>
-              <label className="label">Stock</label>
-              <input
-                className="input"
-                type="number"
-                min="0"
-                step="1"
-                name="stock"
-                value={form.stock}
-                onChange={onChange}
-                placeholder="Ej: 10"
-                inputMode="numeric"
-              />
-            </div>
-
-            <div>
-              <label className="label">Stock mínimo</label>
-              <input
-                className="input"
-                type="number"
-                min="0"
-                step="1"
-                name="stockMinimo"
-                value={form.stockMinimo}
-                onChange={onChange}
-                placeholder="Ej: 3"
-                inputMode="numeric"
-              />
-            </div>
-          </div>
-
-          <div className="row mt12" style={{ justifyContent: "space-between" }}>
-            <label className="checkboxRow">
-              <input type="checkbox" name="activo" checked={form.activo} onChange={onChange} />
-              Activo
-            </label>
-
-            <div className="row">
-              <button className="btn btnPrimary" type="submit">
-                {editingId === null ? "Crear" : "Guardar cambios"}
-              </button>
-
-              {editingId !== null && (
-                <button className="btn btnNeutral" type="button" onClick={resetForm}>
-                  Cancelar
-                </button>
-              )}
-            </div>
-          </div>
-        </form>
-      </div>
+      <ProductoForm
+        editingId={editingId}
+        form={form}
+        onChange={onChange}
+        onSubmit={onSubmit}
+        resetForm={resetForm}
+      />
 
       <div className="row mt12" style={{ justifyContent: "space-between" }}>
         <h2 className="m0">Listado</h2>
         {loading && <small style={{ color: "var(--muted)" }}>Cargando...</small>}
       </div>
 
-      {/* ✅ filtros del listado (uno al lado del otro) */}
       <div className="row mt12" style={{ gap: 12, flexWrap: "wrap" }}>
         <div style={{ flex: "1 1 240px" }}>
           <label className="label">Buscar por nombre</label>
-          <input
-            className="input"
-            value={filtroNombre}
-            onChange={(e) => setFiltroNombre(e.target.value)}
-            placeholder="Ej: lámpara"
-          />
+          <input className="input" value={filtroNombre} onChange={(e) => setFiltroNombre(e.target.value)} />
         </div>
 
         <div style={{ flex: "1 1 240px" }}>
           <label className="label">Buscar por marca</label>
-          <input
-            className="input"
-            value={filtroMarca}
-            onChange={(e) => setFiltroMarca(e.target.value)}
-            placeholder="Ej: ferrolux"
-          />
+          <input className="input" value={filtroMarca} onChange={(e) => setFiltroMarca(e.target.value)} />
         </div>
 
         <div style={{ flex: "0 0 220px" }}>
@@ -327,57 +196,12 @@ export default function ProductosPage() {
         </div>
       </div>
 
-      {!loading && productosFiltrados.length === 0 ? (
-        <p className="mt12">No hay productos que coincidan con el filtro.</p>
-      ) : (
-        <div className="tableWrap mt12">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Marca</th>
-                <th>Categoría</th>
-                <th>Precio</th>
-                <th>Stock</th>
-                <th>Mín</th>
-                <th>Activo</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {productosFiltrados.map((p) => (
-                <tr key={p.id}>
-                  <td>{p.id}</td>
-                  <td>{p.nombre}</td>
-                  <td>{p.marca ?? "-"}</td>
-                  <td>{p.categoria ?? "-"}</td>
-                  <td>${p.precio}</td>
-                  <td>{p.stock}</td>
-                  <td>{p.stockMinimo}</td>
-                  <td>{p.activo ? "Sí" : "No"}</td>
-                  <td>
-                    <div className="row">
-                      <button className="btn btnNeutral btnSm" type="button" onClick={() => onEditarClick(p)}>
-                        Editar
-                      </button>
-                      <button className="btn btnDanger btnSm" type="button" onClick={() => onEliminarClick(p)}>
-                        Eliminar
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-
-              {loading && (
-                <tr>
-                  <td colSpan="9">Cargando...</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <ProductosTable
+        productos={productosFiltrados}
+        loading={loading}
+        onEditarClick={onEditarClick}
+        onEliminarClick={onEliminarClick}
+      />
     </div>
   );
 }
