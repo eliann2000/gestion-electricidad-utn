@@ -1,5 +1,5 @@
-export default function ProductosTable({ productos, loading, onEditarClick, onEliminarClick }) {
-    if (!loading && productos.length === 0) {
+export default function ProductosTable({ productos, cargando, editar, eliminar }) {
+    if (!cargando && productos.length === 0) {
         return <p className="mt12">No hay productos que coincidan con el filtro.</p>;
     }
 
@@ -25,18 +25,18 @@ export default function ProductosTable({ productos, loading, onEditarClick, onEl
                         <tr key={p.id}>
                             <td>{p.id}</td>
                             <td>{p.nombre}</td>
-                            <td>{p.marca ?? "-"}</td>
-                            <td>{p.categoria ?? "-"}</td>
+                            <td>{p.marca || "-"}</td>
+                            <td>{p.categoria || "-"}</td>
                             <td>${p.precio}</td>
                             <td>{p.stock}</td>
                             <td>{p.stockMinimo}</td>
                             <td>{p.activo ? "Sí" : "No"}</td>
                             <td>
                                 <div className="row">
-                                    <button className="btn btnNeutral btnSm" type="button" onClick={() => onEditarClick(p)}>
+                                    <button className="btn btnNeutral btnSm" type="button" onClick={() => editar(p)}>
                                         Editar
                                     </button>
-                                    <button className="btn btnDanger btnSm" type="button" onClick={() => onEliminarClick(p)}>
+                                    <button className="btn btnDanger btnSm" type="button" onClick={() => eliminar(p)}>
                                         Eliminar
                                     </button>
                                 </div>
@@ -44,7 +44,7 @@ export default function ProductosTable({ productos, loading, onEditarClick, onEl
                         </tr>
                     ))}
 
-                    {loading && (
+                    {cargando && (
                         <tr>
                             <td colSpan="9">Cargando...</td>
                         </tr>

@@ -1,8 +1,10 @@
-export default function ProductoForm({ editingId, form, onChange, onSubmit, resetForm }) {
+export default function ProductoForm({ idEditando, form, onChange, onSubmit, limpiar }) {
+    const editando = idEditando !== null;
+
     return (
         <div className="mt12 card cardFlat">
             <h2 className="cardTitle">
-                {editingId === null ? "Nuevo producto" : `Editando producto ID ${editingId}`}
+                {editando ? `Editando producto ID ${idEditando}` : "Nuevo producto"}
             </h2>
 
             <form onSubmit={onSubmit}>
@@ -35,13 +37,7 @@ export default function ProductoForm({ editingId, form, onChange, onSubmit, rese
 
                     <div>
                         <label className="label">Marca</label>
-                        <input
-                            className="input"
-                            name="marca"
-                            value={form.marca}
-                            onChange={onChange}
-                            placeholder="Ej: Ferrolux"
-                        />
+                        <input className="input" name="marca" value={form.marca} onChange={onChange} placeholder="Ej: Ferrolux" />
                     </div>
 
                     <div>
@@ -94,11 +90,11 @@ export default function ProductoForm({ editingId, form, onChange, onSubmit, rese
 
                     <div className="row">
                         <button className="btn btnPrimary" type="submit">
-                            {editingId === null ? "Crear" : "Guardar cambios"}
+                            {editando ? "Guardar cambios" : "Crear"}
                         </button>
 
-                        {editingId !== null && (
-                            <button className="btn btnNeutral" type="button" onClick={resetForm}>
+                        {editando && (
+                            <button className="btn btnNeutral" type="button" onClick={limpiar}>
                                 Cancelar
                             </button>
                         )}
