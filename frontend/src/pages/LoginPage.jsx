@@ -2,42 +2,37 @@ import { useState } from "react";
 import { saveSession } from "../auth";
 
 export default function LoginPage({ onLogin }) {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-
-    const [loading, setLoading] = useState(false);
+    const [usuario, setUsuario] = useState("");
+    const [clave, setClave] = useState("");
+    const [cargando, setCargando] = useState(false);
     const [error, setError] = useState("");
 
-    async function handleSubmit(e) {
+    const entrar = async (e) => {
         e.preventDefault();
         setError("");
 
-        const u = username.trim();
-        const p = password;
+        const u = usuario.trim();
+        if (!u || !clave) return setError("Completá usuario y contraseña");
 
-        if (!u || !p) return setError("Completá usuario y contraseña");
-
-        setLoading(true);
+        setCargando(true);
         try {
             const res = await fetch("http://localhost:3001/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username: u, password: p }),
+                body: JSON.stringify({ username: u, password: clave }),
             });
 
             const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data.message || "Error al iniciar sesión");
 
             saveSession(data.token, data.user);
-
-            // Avisamos a App.js (para redirigir o refrescar UI)
-            if (onLogin) onLogin(data.user);
-        } catch (e2) {
-            setError(e2.message);
+            onLogin?.(data.user);
+        } catch (err) {
+            setError(err.message);
         } finally {
-            setLoading(false);
+            setCargando(false);
         }
-    }
+    };
 
     return (
         <div className="card" style={{ maxWidth: 520, margin: "24px auto" }}>
@@ -52,13 +47,13 @@ export default function LoginPage({ onLogin }) {
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="mt12">
+            <form onSubmit={entrar} className="mt12">
                 <div className="mt12">
                     <label className="label">Usuario</label>
                     <input
                         className="input"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        value={usuario}
+                        onChange={(e) => setUsuario(e.target.value)}
                         placeholder="Ej: admin"
                         autoComplete="username"
                     />
@@ -69,22 +64,22 @@ export default function LoginPage({ onLogin }) {
                     <input
                         className="input"
                         type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        value={clave}
+                        onChange={(e) => setClave(e.target.value)}
                         placeholder="Tu contraseña"
                         autoComplete="current-password"
                     />
                 </div>
 
                 <div className="row mt12" style={{ justifyContent: "flex-end" }}>
-                    <button className="btn btnPrimary" type="submit" disabled={loading}>
-                        {loading ? "Ingresando..." : "Ingresar"}
+                    <button className="btn btnPrimary" type="submit" disabled={cargando}>
+                        {cargando ? "Ingresando..." : "Ingresar"}
                     </button>
                 </div>
             </form>
 
             <p className="mt12" style={{ color: "var(--muted)", fontSize: 12 }}>
-                * Para pruebas: admin / admin (o la contraseña que pusiste).
+                * Para pruebas: admin / admin
             </p>
         </div>
     );
