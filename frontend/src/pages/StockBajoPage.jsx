@@ -2,22 +2,21 @@ import { useEffect, useState } from "react";
 import { reportesApi } from "../services/reportes";
 
 export default function StockBajoPage() {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [lista, setLista] = useState([]);
+  const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
 
-  async function cargar() {
-    setLoading(true);
+  const cargar = async () => {
+    setCargando(true);
     setError("");
     try {
-      const data = await reportesApi.stockBajo();
-      setItems(data);
+      setLista(await reportesApi.stockBajo());
     } catch (e) {
       setError(e.message);
     } finally {
-      setLoading(false);
+      setCargando(false);
     }
-  }
+  };
 
   useEffect(() => {
     cargar();
@@ -40,21 +39,23 @@ export default function StockBajoPage() {
         </div>
       )}
 
-      {loading ? (
+      {cargando && (
         <p className="mt12" style={{ color: "var(--muted)" }}>
           Cargando...
         </p>
-      ) : items.length === 0 ? (
+      )}
+
+      {!cargando && !error && lista.length === 0 && (
         <div className="alert alertOk mt12">
           <b>OK:</b> No hay productos con stock mínimo.
         </div>
-      ) : (
+      )}
+
+      {!cargando && lista.length > 0 && (
         <>
-          <div className="row mt12" style={{ justifyContent: "space-between" }}>
-            <p className="m0" style={{ color: "var(--muted)" }}>
-              Resultados: <b>{items.length}</b>
-            </p>
-          </div>
+          <p className="m0 mt12" style={{ color: "var(--muted)" }}>
+            Resultados: <b>{lista.length}</b>
+          </p>
 
           <div className="tableWrap mt12">
             <table className="table">
@@ -69,12 +70,12 @@ export default function StockBajoPage() {
                 </tr>
               </thead>
               <tbody>
-                {items.map((p) => (
+                {lista.map((p) => (
                   <tr key={p.id}>
                     <td>{p.id}</td>
                     <td>{p.nombre}</td>
-                    <td>{p.marca ?? "-"}</td>
-                    <td>{p.categoria ?? "-"}</td>
+                    <td>{p.marca || "-"}</td>
+                    <td>{p.categoria || "-"}</td>
                     <td>{p.stock}</td>
                     <td>{p.stockMinimo}</td>
                   </tr>
