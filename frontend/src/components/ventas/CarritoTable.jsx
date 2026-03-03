@@ -1,15 +1,15 @@
 export default function CarritoTable({
     items,
     productos,
-    editRowPid,
-    editProductoId,
-    editCantidad,
-    setEditProductoId,
-    setEditCantidad,
-    iniciarEdicion,
-    guardarEdicion,
-    cancelarEdicion,
-    quitarItem,
+    idItemEdit,
+    prodEdit,
+    cantEdit,
+    setProdEdit,
+    setCantEdit,
+    editar,
+    guardar,
+    cancelar,
+    quitar,
 }) {
     return (
         <div className="mt12">
@@ -34,72 +34,73 @@ export default function CarritoTable({
                                 <th>Acciones</th>
                             </tr>
                         </thead>
+
                         <tbody>
-                            {items.map((it) => (
-                                <tr key={it.productoId}>
-                                    <td>
-                                        {it.productoId} - {it.nombre}
-                                    </td>
-                                    <td>${it.precio}</td>
+                            {items.map((it) => {
+                                const editando = idItemEdit === it.productoId;
 
-                                    <td>
-                                        {editRowPid === it.productoId ? (
-                                            <input
-                                                className="input"
-                                                style={{ width: 110 }}
-                                                inputMode="numeric"
-                                                value={editCantidad}
-                                                onChange={(e) => setEditCantidad(e.target.value)}
-                                            />
-                                        ) : (
-                                            it.cantidad
-                                        )}
-                                    </td>
+                                return (
+                                    <tr key={it.productoId}>
+                                        <td>
+                                            {it.productoId} - {it.nombre}
+                                        </td>
+                                        <td>${it.precio}</td>
 
-                                    <td>${it.subtotal}</td>
+                                        <td>
+                                            {editando ? (
+                                                <input
+                                                    className="input"
+                                                    style={{ width: 110 }}
+                                                    inputMode="numeric"
+                                                    value={cantEdit}
+                                                    onChange={(e) => setCantEdit(e.target.value)}
+                                                />
+                                            ) : (
+                                                it.cantidad
+                                            )}
+                                        </td>
 
-                                    <td>
-                                        {editRowPid === it.productoId ? (
-                                            <div className="row" style={{ alignItems: "center" }}>
-                                                <select
-                                                    className="select"
-                                                    style={{ width: "min(260px, 60vw)" }}
-                                                    value={editProductoId}
-                                                    onChange={(e) => setEditProductoId(e.target.value)}
-                                                >
-                                                    {productos.map((p) => (
-                                                        <option key={p.id} value={p.id}>
-                                                            {p.id} - {p.nombre} (stock {p.stock}) - ${p.precio}
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                        <td>${it.subtotal}</td>
 
-                                                <div className="rowNoWrap">
-                                                    <button className="btn btnPrimary btnSm" type="button" onClick={guardarEdicion}>
-                                                        Guardar
+                                        <td>
+                                            {editando ? (
+                                                <div className="row" style={{ alignItems: "center" }}>
+                                                    <select
+                                                        className="select"
+                                                        style={{ width: "min(260px, 60vw)" }}
+                                                        value={prodEdit}
+                                                        onChange={(e) => setProdEdit(e.target.value)}
+                                                    >
+                                                        {productos.map((p) => (
+                                                            <option key={p.id} value={p.id}>
+                                                                {p.id} - {p.nombre} (stock {p.stock}) - ${p.precio}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+
+                                                    <div className="rowNoWrap">
+                                                        <button className="btn btnPrimary btnSm" type="button" onClick={guardar}>
+                                                            Guardar
+                                                        </button>
+                                                        <button className="btn btnNeutral btnSm" type="button" onClick={cancelar}>
+                                                            Cancelar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="row">
+                                                    <button className="btn btnWarning btnSm" type="button" onClick={() => editar(it)}>
+                                                        Modificar
                                                     </button>
-                                                    <button className="btn btnNeutral btnSm" type="button" onClick={cancelarEdicion}>
-                                                        Cancelar
+                                                    <button className="btn btnDanger btnSm" type="button" onClick={() => quitar(it.productoId)}>
+                                                        Quitar
                                                     </button>
                                                 </div>
-                                            </div>
-                                        ) : (
-                                            <div className="row">
-                                                <button className="btn btnWarning btnSm" type="button" onClick={() => iniciarEdicion(it)}>
-                                                    Modificar
-                                                </button>
-                                                <button
-                                                    className="btn btnDanger btnSm"
-                                                    type="button"
-                                                    onClick={() => quitarItem(it.productoId)}
-                                                >
-                                                    Quitar
-                                                </button>
-                                            </div>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>

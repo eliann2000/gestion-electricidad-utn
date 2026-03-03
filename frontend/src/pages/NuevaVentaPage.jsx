@@ -3,47 +3,60 @@ import { clientesApi } from "../services/clientes";
 import { productosApi } from "../services/productos";
 import { ventasApi } from "../services/ventas";
 
-// ✅ NUEVO: import del componente modularizado (solo carrito)
 import CarritoTable from "../components/ventas/CarritoTable";
 
 export default function NuevaVentaPage() {
   const [clientes, setClientes] = useState([]);
   const [productos, setProductos] = useState([]);
 
-  const [clienteId, setClienteId] = useState(""); // opcional
+  const [clienteId, setClienteId] = useState("");
   const [productoId, setProductoId] = useState("");
   const [cantidad, setCantidad] = useState("1");
 
-  const [items, setItems] = useState([]); // { productoId, nombre, precio, cantidad, subtotal }
+  const [items, setItems] = useState([]);
   const [error, setError] = useState("");
   const [okMsg, setOkMsg] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // ✅ checkbox para enviar email
   const [enviarEmail, setEnviarEmail] = useState(false);
 
-  // Edición por fila del carrito
-  const [editRowPid, setEditRowPid] = useState(null); // productoId de la fila que edito
-  const [editProductoId, setEditProductoId] = useState("");
-  const [editCantidad, setEditCantidad] = useState("1");
+  // edición carrito (nombres simples)
+  const [idItemEdit, setIdItemEdit] = useState(null); // id del producto de la fila que edito
+  const [prodEdit, setProdEdit] = useState("");
+  const [cantEdit, setCantEdit] = useState("1");
 
-  async function cargarData() {
+  const limpiarMsgs = () => {
+    setError("");
+    setOkMsg("");
+  };
+
+  const resetEdicion = () => {
+    setIdItemEdit(null);
+    setProdEdit("");
+    setCantEdit("1");
+  };
+
+  const buscarProd = (id) => productos.find((p) => p.id === id);
+
+  const cargarData = async () => {
     setLoading(true);
     setError("");
     try {
       const [c, p] = await Promise.all([clientesApi.list(), productosApi.list()]);
+
       setClientes(
         [...c].sort((a, b) =>
           `${a.apellido} ${a.nombre}`.localeCompare(`${b.apellido} ${b.nombre}`, "es")
         )
       );
+
       setProductos(p.filter((x) => x.activo));
     } catch (e) {
       setError(e.message);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     cargarData();
@@ -51,129 +64,92 @@ export default function NuevaVentaPage() {
 
   const total = useMemo(() => items.reduce((acc, it) => acc + it.subtotal, 0), [items]);
 
-  function agregarItem() {
-    setError("");
-    setOkMsg("");
+  const agregarItem = () => {
+    limpiarMsgs();
 
-    const pid = Number(productoId);
-    const qty = Number(cantidad);
+    const idProd = Number(productoId);
+    const cant = Number(cantidad);
 
-    if (!pid) return setError("Elegí un producto");
-    if (!Number.isFinite(qty) || qty <= 0) return setError("Cantidad inválida");
+    if (!idProd) return setError("Elegí un producto");
+    if (!Number.isFinite(cant) || cant <= 0) return setError("Cantidad inválida");
 
-    const prod = productos.find((p) => p.id === pid);
+    const prod = buscarProd(idProd);
     if (!prod) return setError("Producto no encontrado");
 
-    const existente = items.find((it) => it.productoId === pid);
     const precio = Number(prod.precio);
+    const yaEnCarrito = items.find((x) => x.productoId === idProd);
+    const cantFinal = (yaEnCarrito?.cantidad || 0) + cant;
 
-    const nuevaCantidad = (existente?.cantidad ?? 0) + qty;
-    const nuevoSubtotal = precio * nuevaCantidad;
+    if (cantFinal > prod.stock) return setError(`Stock insuficiente. Disponible: ${prod.stock}`);
 
-    if (nuevaCantidad > prod.stock) {
-      return setError(`Stock insuficiente. Disponible: ${prod.stock}`);
-    }
-
-    if (existente) {
-      setItems((prev) =>
-        prev.map((it) =>
-          it.productoId === pid ? { ...it, cantidad: nuevaCantidad, subtotal: nuevoSubtotal } : it
-        )
-      );
-    } else {
-      setItems((prev) => [
-        ...prev,
-        { productoId: pid, nombre: prod.nombre, precio, cantidad: qty, subtotal: precio * qty },
-      ]);
-    }
+    setItems((prev) => {
+      if (yaEnCarrito) {
+        return prev.map((x) =>
+          x.productoId === idProd ? { ...x, cantidad: cantFinal, subtotal: precio * cantFinal } : x
+        );
+      }
+      return [...prev, { productoId: idProd, nombre: prod.nombre, precio, cantidad: cant, subtotal: precio * cant }];
+    });
 
     setProductoId("");
     setCantidad("1");
-  }
+  };
 
-  function quitarItem(pid) {
-    if (editRowPid === pid) cancelarEdicion();
-    setItems((prev) => prev.filter((it) => it.productoId !== pid));
-  }
+  const quitarItem = (idProd) => {
+    if (idItemEdit === idProd) resetEdicion();
+    setItems((prev) => prev.filter((x) => x.productoId !== idProd));
+  };
 
-  function iniciarEdicion(it) {
-    setError("");
-    setOkMsg("");
-    setEditRowPid(it.productoId);
-    setEditProductoId(String(it.productoId));
-    setEditCantidad(String(it.cantidad));
-  }
+  const iniciarEdicion = (it) => {
+    limpiarMsgs();
+    setIdItemEdit(it.productoId);
+    setProdEdit(String(it.productoId));
+    setCantEdit(String(it.cantidad));
+  };
 
-  function cancelarEdicion() {
-    setEditRowPid(null);
-    setEditProductoId("");
-    setEditCantidad("1");
-  }
+  const guardarEdicion = () => {
+    limpiarMsgs();
 
-  function guardarEdicion() {
-    setError("");
-    setOkMsg("");
+    const idViejo = idItemEdit;
+    const idNuevo = Number(prodEdit);
+    const cantNueva = Number(cantEdit);
 
-    const oldPid = editRowPid;
-    const newPid = Number(editProductoId);
-    const newQty = Number(editCantidad);
+    if (!idViejo) return;
+    if (!idNuevo) return setError("Elegí un producto");
+    if (!Number.isFinite(cantNueva) || cantNueva <= 0) return setError("Cantidad inválida");
 
-    if (!oldPid) return;
-    if (!newPid) return setError("Elegí un producto");
-    if (!Number.isFinite(newQty) || newQty <= 0) return setError("Cantidad inválida");
+    const prod = buscarProd(idNuevo);
+    if (!prod) return setError("Producto no encontrado");
+    if (cantNueva > prod.stock) return setError(`Stock insuficiente. Disponible: ${prod.stock}`);
 
-    const prodNuevo = productos.find((p) => p.id === newPid);
-    if (!prodNuevo) return setError("Producto no encontrado");
-
-    if (newQty > prodNuevo.stock) {
-      return setError(`Stock insuficiente. Disponible: ${prodNuevo.stock}`);
+    // si cambio a un producto que ya estaba, se fusiona
+    const yaEnCarrito = items.find((x) => x.productoId === idNuevo && x.productoId !== idViejo);
+    if (yaEnCarrito && yaEnCarrito.cantidad + cantNueva > prod.stock) {
+      return setError(`No se puede fusionar: stock insuficiente. Disponible: ${prod.stock}`);
     }
 
-    // Si cambia a un producto que ya existe en carrito, vamos a fusionar
-    const existente = items.find((x) => x.productoId === newPid && x.productoId !== oldPid);
-    if (existente) {
-      const qtyFusion = existente.cantidad + newQty;
-      if (qtyFusion > prodNuevo.stock) {
-        return setError(`No se puede fusionar: stock insuficiente. Disponible: ${prodNuevo.stock}`);
-      }
-    }
-
-    const precioNuevo = Number(prodNuevo.precio);
+    const precio = Number(prod.precio);
 
     setItems((prev) => {
-      const sinViejo = prev.filter((x) => x.productoId !== oldPid);
+      const sinViejo = prev.filter((x) => x.productoId !== idViejo);
+      const existe = sinViejo.find((x) => x.productoId === idNuevo);
 
-      // Fusionar si ya existe
-      const yaEsta = sinViejo.find((x) => x.productoId === newPid);
-      if (yaEsta) {
-        const qtyFusion = yaEsta.cantidad + newQty;
+      if (existe) {
+        const fusion = existe.cantidad + cantNueva;
         return sinViejo.map((x) =>
-          x.productoId === newPid
-            ? { ...x, cantidad: qtyFusion, subtotal: Number(x.precio) * qtyFusion }
-            : x
+          x.productoId === idNuevo ? { ...x, cantidad: fusion, subtotal: Number(x.precio) * fusion } : x
         );
       }
 
-      // Reemplazar por nuevo item
-      return [
-        ...sinViejo,
-        {
-          productoId: newPid,
-          nombre: prodNuevo.nombre,
-          precio: precioNuevo,
-          cantidad: newQty,
-          subtotal: precioNuevo * newQty,
-        },
-      ].sort((a, b) => a.productoId - b.productoId);
+      return [...sinViejo, { productoId: idNuevo, nombre: prod.nombre, precio, cantidad: cantNueva, subtotal: precio * cantNueva }]
+        .sort((a, b) => a.productoId - b.productoId);
     });
 
-    cancelarEdicion();
-  }
+    resetEdicion();
+  };
 
-  async function registrarVenta() {
-    setError("");
-    setOkMsg("");
-
+  const registrarVenta = async () => {
+    limpiarMsgs();
     if (items.length === 0) return setError("Agregá al menos un producto");
 
     const body = {
@@ -191,14 +167,13 @@ export default function NuevaVentaPage() {
           if (!to) throw new Error("No se envió el correo: no ingresaste email destino.");
         }
 
-        const url = `http://localhost:3001/api/ventas/${venta.id}/enviar-correo`;
-        const resp = await fetch(url, {
+        const resp = await fetch(`http://localhost:3001/api/ventas/${venta.id}/enviar-correo`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(to ? { to } : {}),
         });
 
-        const data = await resp.json();
+        const data = await resp.json().catch(() => ({}));
         if (!resp.ok) throw new Error(data.message || "Error enviando correo");
       }
 
@@ -210,13 +185,13 @@ export default function NuevaVentaPage() {
 
       setItems([]);
       setClienteId("");
-      cancelarEdicion();
+      resetEdicion();
       setEnviarEmail(false);
-      await cargarData();
+      cargarData();
     } catch (e) {
       setError(e.message);
     }
-  }
+  };
 
   return (
     <div className="card">
@@ -298,19 +273,19 @@ export default function NuevaVentaPage() {
         </div>
       </div>
 
-      {/* ✅ SOLO MODULARIZADO: el carrito */}
+      {/* si CarritoTable usa otros nombres, después se ajusta */}
       <CarritoTable
         items={items}
         productos={productos}
-        editRowPid={editRowPid}
-        editProductoId={editProductoId}
-        editCantidad={editCantidad}
-        setEditProductoId={setEditProductoId}
-        setEditCantidad={setEditCantidad}
-        iniciarEdicion={iniciarEdicion}
-        guardarEdicion={guardarEdicion}
-        cancelarEdicion={cancelarEdicion}
-        quitarItem={quitarItem}
+        idItemEdit={idItemEdit}
+        prodEdit={prodEdit}
+        cantEdit={cantEdit}
+        setProdEdit={setProdEdit}
+        setCantEdit={setCantEdit}
+        editar={iniciarEdicion}
+        guardar={guardarEdicion}
+        cancelar={resetEdicion}
+        quitar={quitarItem}
       />
 
       <div className="row mt12" style={{ justifyContent: "space-between", alignItems: "center" }}>
