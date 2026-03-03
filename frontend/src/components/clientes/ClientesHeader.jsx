@@ -1,4 +1,4 @@
-export default function ClientesToolbar({ total }) {
+export default function ClientesHeader({ total }) {
     return (
         <div className="row" style={{ justifyContent: "space-between" }}>
             <div>

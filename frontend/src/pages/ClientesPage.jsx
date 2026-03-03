@@ -2,11 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { clientesApi } from "../services/clientes";
 
 import ClienteForm from "../components/clientes/ClienteForm";
-import ClientesToolbar from "../components/clientes/ClientesToolbar";
 import ClientesTable from "../components/clientes/ClientesTable";
-import ClientesListadoHeader from "../components/clientes/ClientesListadoHeader";
+import ClientesHeader from "../components/clientes/ClientesHeader";
 
-const initialForm = {
+const formVacio = {
   nombre: "",
   apellido: "",
   telefono: "",
@@ -16,21 +15,21 @@ const initialForm = {
 
 export default function ClientesPage() {
   const [clientes, setClientes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
 
-  const [editingId, setEditingId] = useState(null);
-  const [form, setForm] = useState(initialForm);
+  const [idEditando, setIdEditando] = useState(null);
+  const [form, setForm] = useState(formVacio);
 
   const [filtro, setFiltro] = useState("");
 
-  function resetForm() {
-    setForm(initialForm);
-    setEditingId(null);
-  }
+  const limpiar = () => {
+    setForm(formVacio);
+    setIdEditando(null);
+  };
 
-  async function cargarClientes() {
-    setLoading(true);
+  const traerClientes = async () => {
+    setCargando(true);
     setError("");
     try {
       const data = await clientesApi.list();
@@ -38,92 +37,93 @@ export default function ClientesPage() {
     } catch (e) {
       setError(e.message);
     } finally {
-      setLoading(false);
+      setCargando(false);
     }
-  }
+  };
 
   useEffect(() => {
-    cargarClientes();
+    traerClientes();
   }, []);
 
-  function onChange(e) {
+  const onChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-  }
+  };
 
-  function buildBodyFromForm() {
-    return {
-      nombre: form.nombre.trim(),
-      apellido: form.apellido.trim(),
-      telefono: form.telefono.trim(),
-      email: form.email.trim(),
-      direccion: form.direccion.trim() || null,
-    };
-  }
+  const armarBody = () => ({
+    nombre: form.nombre.trim(),
+    apellido: form.apellido.trim(),
+    telefono: form.telefono.trim(),
+    email: form.email.trim(),
+    direccion: form.direccion.trim() || null,
+  });
 
-  async function onSubmit(e) {
+  const validar = (b) => {
+    if (!b.nombre) return "El nombre es obligatorio";
+    if (!b.apellido) return "El apellido es obligatorio";
+    if (!b.telefono) return "El teléfono es obligatorio";
+    if (!b.email) return "El email es obligatorio";
+    return "";
+  };
+
+  const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    const body = buildBodyFromForm();
-
-    if (!body.nombre) return setError("El nombre es obligatorio");
-    if (!body.apellido) return setError("El apellido es obligatorio");
-    if (!body.telefono) return setError("El teléfono es obligatorio");
-    if (!body.email) return setError("El email es obligatorio");
+    const body = armarBody();
+    const msg = validar(body);
+    if (msg) return setError(msg);
 
     try {
-      if (editingId === null) await clientesApi.create(body);
-      else await clientesApi.update(editingId, body);
+      if (idEditando === null) await clientesApi.create(body);
+      else await clientesApi.update(idEditando, body);
 
-      resetForm();
-      await cargarClientes();
+      limpiar();
+      traerClientes();
     } catch (e) {
       setError(e.message);
     }
-  }
+  };
 
-  function onEditarClick(c) {
-    setEditingId(c.id);
+  const editar = (c) => {
+    setIdEditando(c.id);
     setForm({
-      nombre: c.nombre ?? "",
-      apellido: c.apellido ?? "",
-      telefono: c.telefono ?? "",
-      email: c.email ?? "",
-      direccion: c.direccion ?? "",
+      nombre: c.nombre || "",
+      apellido: c.apellido || "",
+      telefono: c.telefono || "",
+      email: c.email || "",
+      direccion: c.direccion || "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }
+  };
 
-  async function onEliminarClick(c) {
+  const eliminar = async (c) => {
     const ok = window.confirm(`¿Eliminar el cliente "${c.nombre} ${c.apellido}" (ID ${c.id})?`);
     if (!ok) return;
 
     setError("");
     try {
       await clientesApi.remove(c.id);
-      await cargarClientes();
-      if (editingId === c.id) resetForm();
+      traerClientes();
+      if (idEditando === c.id) limpiar();
     } catch (e) {
       const msg = String(e?.message || "");
-      if (msg.includes("403") || msg.includes("Solo ADMIN")) {
-        return setError("No tenés permisos para eliminar clientes. Solo un ADMIN puede hacerlo.");
+      if (msg.includes("403") || msg.toLowerCase().includes("admin")) {
+        setError("No tenés permisos para eliminar clientes. Solo un ADMIN puede hacerlo.");
+      } else {
+        setError(msg);
       }
-      setError(msg);
     }
-  }
+  };
 
   const clientesFiltrados = useMemo(() => {
-    const filtroLower = filtro.toLowerCase();
-    return clientes.filter((c) => {
-      const texto = `${c.nombre ?? ""} ${c.apellido ?? ""}`.toLowerCase();
-      return texto.includes(filtroLower);
-    });
+    const f = filtro.toLowerCase();
+    return clientes.filter((c) => `${c.nombre || ""} ${c.apellido || ""}`.toLowerCase().includes(f));
   }, [clientes, filtro]);
 
   return (
     <div className="card">
-      <ClientesToolbar total={clientesFiltrados.length} />
+      <ClientesHeader total={clientesFiltrados.length} />
 
       {error && (
         <div className="alert alertError mt12">
@@ -132,24 +132,36 @@ export default function ClientesPage() {
       )}
 
       <ClienteForm
-        editingId={editingId}
+        editingId={idEditando}
         form={form}
         onChange={onChange}
         onSubmit={onSubmit}
-        resetForm={resetForm}
+        resetForm={limpiar}
       />
 
-      <ClientesListadoHeader
-        loading={loading}
-        filtro={filtro}
-        setFiltro={setFiltro}
-      />
+      {/* ✅ AHORA va abajo */}
+      <div className="row mt12" style={{ justifyContent: "space-between" }}>
+        <h2 className="m0">Listado</h2>
+        {cargando && <small style={{ color: "var(--muted)" }}>Cargando...</small>}
+      </div>
+
+      <div className="row mt12" style={{ gap: 12, flexWrap: "wrap" }}>
+        <div style={{ flex: "1 1 280px" }}>
+          <label className="label">Buscar por nombre o apellido</label>
+          <input
+            className="input"
+            value={filtro}
+            onChange={(e) => setFiltro(e.target.value)}
+            placeholder="Ej: juan o pérez"
+          />
+        </div>
+      </div>
 
       <ClientesTable
         clientes={clientesFiltrados}
-        loading={loading}
-        onEditarClick={onEditarClick}
-        onEliminarClick={onEliminarClick}
+        loading={cargando}
+        onEditarClick={editar}
+        onEliminarClick={eliminar}
       />
     </div>
   );
