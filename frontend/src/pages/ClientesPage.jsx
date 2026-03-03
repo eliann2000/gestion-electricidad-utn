@@ -132,11 +132,11 @@ export default function ClientesPage() {
       )}
 
       <ClienteForm
-        editingId={idEditando}
+        idEditando={idEditando}
         form={form}
-        onChange={onChange}
-        onSubmit={onSubmit}
-        resetForm={limpiar}
+        cambiar={onChange}
+        guardar={onSubmit}
+        limpiar={limpiar}
       />
 
       {/* ✅ AHORA va abajo */}
@@ -159,9 +159,9 @@ export default function ClientesPage() {
 
       <ClientesTable
         clientes={clientesFiltrados}
-        loading={cargando}
-        onEditarClick={editar}
-        onEliminarClick={eliminar}
+        cargando={cargando}
+        editar={editar}
+        eliminar={eliminar}
       />
     </div>
   );

@@ -1,5 +1,5 @@
-export default function ClientesTable({ clientes, loading, onEditarClick, onEliminarClick }) {
-    if (!loading && clientes.length === 0) {
+export default function ClientesTable({ clientes, cargando, editar, eliminar }) {
+    if (!cargando && clientes.length === 0) {
         return <p className="mt12">No hay clientes que coincidan con la búsqueda.</p>;
     }
 
@@ -18,29 +18,21 @@ export default function ClientesTable({ clientes, loading, onEditarClick, onElim
                 </thead>
 
                 <tbody>
-                    {clientes.map((c) => (
-                        <tr key={c.id}>
-                            <td>{c.id}</td>
+                    {clientes.map((cli) => (
+                        <tr key={cli.id}>
+                            <td>{cli.id}</td>
                             <td>
-                                {c.nombre} {c.apellido}
+                                {cli.nombre} {cli.apellido}
                             </td>
-                            <td>{c.telefono}</td>
-                            <td>{c.email}</td>
-                            <td>{c.direccion ?? "-"}</td>
+                            <td>{cli.telefono}</td>
+                            <td>{cli.email}</td>
+                            <td>{cli.direccion || "-"}</td>
                             <td>
                                 <div className="row">
-                                    <button
-                                        className="btn btnNeutral btnSm"
-                                        type="button"
-                                        onClick={() => onEditarClick(c)}
-                                    >
+                                    <button className="btn btnNeutral btnSm" type="button" onClick={() => editar(cli)}>
                                         Editar
                                     </button>
-                                    <button
-                                        className="btn btnDanger btnSm"
-                                        type="button"
-                                        onClick={() => onEliminarClick(c)}
-                                    >
+                                    <button className="btn btnDanger btnSm" type="button" onClick={() => eliminar(cli)}>
                                         Eliminar
                                     </button>
                                 </div>
@@ -48,7 +40,7 @@ export default function ClientesTable({ clientes, loading, onEditarClick, onElim
                         </tr>
                     ))}
 
-                    {loading && (
+                    {cargando && (
                         <tr>
                             <td colSpan="6">Cargando...</td>
                         </tr>
