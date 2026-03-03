@@ -56,3 +56,16 @@ model DetalleVenta {
   @@index([ventaId])
   @@index([productoId])
 }
+
+enum Rol {
+  ADMIN
+  VENDEDOR
+}
+
+model Usuario {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  rol          Rol      @default(VENDEDOR)
+  createdAt    DateTime @default(now())
+}

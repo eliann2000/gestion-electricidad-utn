@@ -105,7 +105,11 @@ export default function ClientesPage() {
       await cargarClientes();
       if (editingId === c.id) resetForm();
     } catch (e) {
-      setError(e.message);
+      const msg = String(e?.message || "");
+      if (msg.includes("403") || msg.includes("Solo ADMIN")) {
+        return setError("No tenés permisos para eliminar clientes. Solo un ADMIN puede hacerlo.");
+      }
+      setError(msg);
     }
   }
 

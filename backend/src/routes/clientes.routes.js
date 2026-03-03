@@ -1,6 +1,8 @@
 const express = require("express");
 const prisma = require("../prisma");
 
+const { requireAdmin } = require("../middlewares/auth.cjs");
+
 const router = express.Router();
 
 // GET /api/clientes  -> lista todos
@@ -81,7 +83,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE /api/clientes/:id -> borra
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", requireAdmin, async (req, res) => {
   const id = Number(req.params.id);
 
   try {

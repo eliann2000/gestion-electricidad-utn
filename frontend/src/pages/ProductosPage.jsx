@@ -114,6 +114,10 @@ export default function ProductosPage() {
     } catch (e) {
       const msg = String(e?.message || "");
 
+      if (msg.includes("403") || msg.includes("Solo ADMIN")) {
+        return setError("No tenés permisos para eliminar productos. Solo un ADMIN puede hacerlo.");
+      }
+
       if (
         msg.includes("No se puede eliminar este producto") ||
         msg.includes("P2003") ||
