@@ -98,7 +98,7 @@ export default function ClientesPage() {
   };
 
   const eliminar = async (c) => {
-    const ok = window.confirm(`¿Eliminar el cliente "${c.nombre} ${c.apellido}" (ID ${c.id})?`);
+    const ok = window.confirm(`¿Eliminar el cliente "${c.nombre} ${c.apellido}"?`);
     if (!ok) return;
 
     setError("");

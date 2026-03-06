@@ -108,7 +108,7 @@ export default function ProductosPage() {
   };
 
   const eliminar = async (p) => {
-    if (!window.confirm(`¿Eliminar el producto "${p.nombre}" (ID ${p.id})?`)) return;
+    if (!window.confirm(`¿Eliminar el producto "${p.nombre}"?`)) return;
 
     setError("");
     try {

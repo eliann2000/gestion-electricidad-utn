@@ -55,15 +55,15 @@ model Venta {
 }
 
 model DetalleVenta {
-  id             Int     @id @default(autoincrement())
+  id             Int      @id @default(autoincrement())
   ventaId        Int
-  productoId     Int
+  productoId     Int?
   cantidad       Int
-  precioUnitario Decimal @db.Decimal(10,2)
-  subtotal       Decimal @db.Decimal(10,2)
+  precioUnitario Decimal  @db.Decimal(10,2)
+  subtotal       Decimal  @db.Decimal(10,2)
 
   venta    Venta    @relation(fields: [ventaId], references: [id])
-  producto Producto @relation(fields: [productoId], references: [id])
+  producto Producto? @relation(fields: [productoId], references: [id], onDelete: SetNull)
 
   @@index([ventaId])
   @@index([productoId])

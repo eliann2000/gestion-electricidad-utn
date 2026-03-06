@@ -12,7 +12,6 @@ export default function MarcasPage() {
     const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
     const [error, setError] = useState("");
-    const [ok, setOk] = useState("");
 
     async function cargarMarcas() {
         try {
@@ -42,7 +41,6 @@ export default function MarcasPage() {
     async function guardar(e) {
         e.preventDefault();
         setError("");
-        setOk("");
 
         if (!nombre.trim()) {
             setError("El nombre es obligatorio");
@@ -61,10 +59,8 @@ export default function MarcasPage() {
 
             if (idEditando) {
                 await marcasApi.actualizar(idEditando, data);
-                setOk("Marca actualizada correctamente");
             } else {
                 await marcasApi.crear(data);
-                setOk("Marca creada correctamente");
             }
 
             limpiar();
@@ -83,7 +79,6 @@ export default function MarcasPage() {
         setPaginaWeb(marca.paginaWeb || "");
         setActivo(!!marca.activo);
         setError("");
-        setOk("");
         window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -93,9 +88,7 @@ export default function MarcasPage() {
 
         try {
             setError("");
-            setOk("");
             await marcasApi.eliminar(id);
-            setOk("Marca eliminada correctamente");
 
             if (idEditando === id) {
                 limpiar();
@@ -121,12 +114,6 @@ export default function MarcasPage() {
             {error && (
                 <div className="alert alertError mt12">
                     <b>Error:</b> {error}
-                </div>
-            )}
-
-            {ok && (
-                <div className="alert alertOk mt12">
-                    <b>OK:</b> {ok}
                 </div>
             )}
 
@@ -163,7 +150,7 @@ export default function MarcasPage() {
                                 className="input"
                                 value={descripcion}
                                 onChange={(e) => setDescripcion(e.target.value)}
-                                placeholder="Descripción opcional"
+                                placeholder="Ej: Marca de productos electrónicos"
                             />
                         </div>
                     </div>

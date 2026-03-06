@@ -5,5 +5,5 @@ export const clientesApi = {
   get: (id) => apiGet(`/clientes/${id}`),
   create: (body) => apiPost("/clientes", body),
   update: (id, body) => apiPut(`/clientes/${id}`, body),
-  remove: (id) => apiDelete(`/lientes/${id}`),
+  remove: (id) => apiDelete(`/clientes/${id}`),
 };

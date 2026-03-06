@@ -179,8 +179,8 @@ export default function NuevaVentaPage() {
 
       setOkMsg(
         enviarEmail
-          ? `Venta creada (ID ${venta.id}) - Total: ${venta.total}. Correo enviado ✅`
-          : `Venta creada (ID ${venta.id}) - Total: ${venta.total}`
+          ? `Venta creada con ID ${venta.id} - Monto total: $${venta.total}. Correo enviado ✅`
+          : `Venta creada con ID ${venta.id} - Monto total: $${venta.total}`
       );
 
       setItems([]);
@@ -198,9 +198,6 @@ export default function NuevaVentaPage() {
       <div className="row" style={{ justifyContent: "space-between" }}>
         <div>
           <h1 className="m0">Nueva Venta</h1>
-          <p className="m0" style={{ color: "var(--muted)", marginTop: 6 }}>
-            Cargá items, registrá la venta y el stock se descuenta automáticamente.
-          </p>
         </div>
       </div>
 
@@ -218,12 +215,12 @@ export default function NuevaVentaPage() {
 
       {okMsg && (
         <div className="alert alertOk mt12">
-          <b>OK:</b> {okMsg}
+          {okMsg}
         </div>
       )}
 
       <div className="mt12 card cardFlat">
-        <h2 className="cardTitle">Cliente (opcional)</h2>
+        <h2 className="cardTitle">Cliente</h2>
 
         <label className="label">Seleccionar cliente</label>
         <select className="select" value={clienteId} onChange={(e) => setClienteId(e.target.value)}>
