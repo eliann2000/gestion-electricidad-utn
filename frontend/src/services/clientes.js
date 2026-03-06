@@ -1,9 +1,9 @@
 import { apiGet, apiPost, apiPut, apiDelete } from "../api";
 
 export const clientesApi = {
-  list: () => apiGet("/api/clientes"),
-  get: (id) => apiGet(`/api/clientes/${id}`),
-  create: (body) => apiPost("/api/clientes", body),
-  update: (id, body) => apiPut(`/api/clientes/${id}`, body),
-  remove: (id) => apiDelete(`/api/clientes/${id}`),
+  list: () => apiGet("/clientes"),
+  get: (id) => apiGet(`/clientes/${id}`),
+  create: (body) => apiPost("/clientes", body),
+  update: (id, body) => apiPut(`/clientes/${id}`, body),
+  remove: (id) => apiDelete(`/lientes/${id}`),
 };

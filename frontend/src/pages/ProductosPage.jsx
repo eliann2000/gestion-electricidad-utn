@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { productosApi } from "../services/productos";
+import { marcasApi } from "../services/marcas";
 
 import ProductoForm from "../components/productos/ProductoForm";
 import ProductosTable from "../components/productos/ProductosTable";
 
 const formVacio = {
   nombre: "",
-  marca: "",
+  marcaId: "",
   categoria: "",
   precio: "",
   stock: "",
@@ -26,6 +27,8 @@ export default function ProductosPage() {
   const [filtroMarca, setFiltroMarca] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("todos"); // todos | activos | inactivos
 
+  const [marcas, setMarcas] = useState([]);
+
   const limpiar = () => {
     setForm(formVacio);
     setIdEditando(null);
@@ -43,8 +46,18 @@ export default function ProductosPage() {
     }
   };
 
+  const cargarMarcas = async () => {
+    try {
+      const data = await marcasApi.listar();
+      setMarcas(data.filter((m) => m.activo));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   useEffect(() => {
     cargarProductos();
+    cargarMarcas();
   }, []);
 
   const onChange = (e) => {
@@ -58,7 +71,7 @@ export default function ProductosPage() {
 
     const body = {
       nombre: form.nombre.trim(),
-      marca: form.marca.trim() || null,
+      marcaId: form.marcaId === "" ? null : Number(form.marcaId),
       categoria: form.categoria.trim() || null,
       precio: Number(form.precio),
       stock: form.stock === "" ? 0 : Number(form.stock),
@@ -84,7 +97,7 @@ export default function ProductosPage() {
     setIdEditando(p.id);
     setForm({
       nombre: p.nombre || "",
-      marca: p.marca || "",
+      marcaId: p.marcaId ? String(p.marcaId) : "",
       categoria: p.categoria || "",
       precio: String(p.precio ?? ""),
       stock: String(p.stock ?? 0),
@@ -105,10 +118,6 @@ export default function ProductosPage() {
     } catch (e) {
       const msg = String(e?.message || "");
 
-      if (msg.includes("403") || msg.toLowerCase().includes("admin")) {
-        return setError("No tenés permisos para eliminar productos. Solo un ADMIN puede hacerlo.");
-      }
-
       if (msg.includes("P2003") || msg.toLowerCase().includes("foreign key") || msg.toLowerCase().includes("constraint")) {
         return setError("No se puede eliminar este producto porque ya fue utilizado en una venta.");
       }
@@ -123,7 +132,7 @@ export default function ProductosPage() {
 
     return productos.filter((p) => {
       const nom = (p.nombre || "").toLowerCase();
-      const mar = (p.marca || "").toLowerCase();
+      const mar = (p.marca?.nombre || "").toLowerCase();
 
       const okNombre = nom.includes(n);
       const okMarca = mar.includes(m);
@@ -158,6 +167,7 @@ export default function ProductosPage() {
         onChange={onChange}
         onSubmit={guardar}
         limpiar={limpiar}
+        marcas={marcas}
       />
 
       <div className="row mt12" style={{ justifyContent: "space-between" }}>

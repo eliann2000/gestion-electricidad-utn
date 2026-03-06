@@ -7,15 +7,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Marca {
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  paginaWeb   String?
+  activo      Boolean  @default(true)
+
+  productos   Producto[]
+}
+
 model Producto {
   id          Int     @id @default(autoincrement())
   nombre      String
-  marca       String?
   categoria   String?
   precio      Decimal @db.Decimal(10,2)
   stock       Int     @default(0)
   stockMinimo Int     @default(0)
   activo      Boolean @default(true)
+
+  marcaId     Int?
+  marca       Marca?  @relation(fields: [marcaId], references: [id], onDelete: SetNull)
 
   detalles    DetalleVenta[]
 }
@@ -43,29 +55,16 @@ model Venta {
 }
 
 model DetalleVenta {
-  id            Int     @id @default(autoincrement())
-  ventaId       Int
-  productoId    Int
-  cantidad      Int
+  id             Int     @id @default(autoincrement())
+  ventaId        Int
+  productoId     Int
+  cantidad       Int
   precioUnitario Decimal @db.Decimal(10,2)
-  subtotal      Decimal @db.Decimal(10,2)
+  subtotal       Decimal @db.Decimal(10,2)
 
   venta    Venta    @relation(fields: [ventaId], references: [id])
   producto Producto @relation(fields: [productoId], references: [id])
 
   @@index([ventaId])
   @@index([productoId])
-}
-
-enum Rol {
-  ADMIN
-  VENDEDOR
-}
-
-model Usuario {
-  id           Int      @id @default(autoincrement())
-  username     String   @unique
-  passwordHash String
-  rol          Rol      @default(VENDEDOR)
-  createdAt    DateTime @default(now())
 }

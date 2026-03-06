@@ -227,7 +227,7 @@ export default function NuevaVentaPage() {
 
         <label className="label">Seleccionar cliente</label>
         <select className="select" value={clienteId} onChange={(e) => setClienteId(e.target.value)}>
-          <option value="">(Sin cliente)</option>
+          <option value="">Consumidor final</option>
           {clientes.map((c) => (
             <option key={c.id} value={c.id}>
               {c.id} - {c.apellido} {c.nombre}

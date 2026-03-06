@@ -1,5 +1,7 @@
 import { getToken } from "./auth";
 
+const API_URL = "http://localhost:3001/api";
+
 function headers(extra) {
   const token = getToken();
   return {
@@ -9,13 +11,13 @@ function headers(extra) {
 }
 
 async function api(path, { method = "GET", body } = {}) {
-  const res = await fetch(path, {
+  const res = await fetch(`${API_URL}${path}`, {
     method,
     headers: headers(body ? { "Content-Type": "application/json" } : null),
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  if (res.status === 204) return true; // DELETE sin body
+  if (res.status === 204) return true;
 
   const data = await res.json().catch(async () => ({ message: await res.text().catch(() => "") }));
   if (!res.ok) throw new Error(data?.message || `${method} ${path} -> ${res.status}`);

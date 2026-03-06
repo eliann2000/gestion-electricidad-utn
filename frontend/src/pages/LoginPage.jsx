@@ -54,7 +54,7 @@ export default function LoginPage({ onLogin }) {
                         className="input"
                         value={usuario}
                         onChange={(e) => setUsuario(e.target.value)}
-                        placeholder="Ej: admin"
+                        placeholder="Tu usuario"
                         autoComplete="username"
                     />
                 </div>
@@ -78,9 +78,6 @@ export default function LoginPage({ onLogin }) {
                 </div>
             </form>
 
-            <p className="mt12" style={{ color: "var(--muted)", fontSize: 12 }}>
-                * Para pruebas: admin / admin
-            </p>
         </div>
     );
 }

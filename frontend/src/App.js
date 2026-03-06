@@ -5,17 +5,12 @@ import ClientesPage from "./pages/ClientesPage";
 import NuevaVentaPage from "./pages/NuevaVentaPage";
 import StockBajoPage from "./pages/StockBajoPage";
 import LoginPage from "./pages/LoginPage";
-import UsuariosPage from "./pages/UsuariosPage";
+import MarcasPage from "./pages/MarcasPage";
 
 import { getToken, getUser, logout } from "./auth";
 
 function RequireAuth({ children }) {
   return getToken() ? children : <Navigate to="/login" replace />;
-}
-
-function RequireAdmin({ children }) {
-  const usuario = getUser();
-  return usuario?.rol === "ADMIN" ? children : <Navigate to="/ventas" replace />;
 }
 
 export default function App() {
@@ -40,7 +35,7 @@ export default function App() {
             {usuario && (
               <div style={{ marginTop: 10, color: "var(--muted)", fontSize: 12 }}>
                 <div>
-                  Sesión: <b>{usuario.username}</b> ({usuario.rol})
+                  Sesión: <b>{usuario.username}</b>
                 </div>
 
                 <button
@@ -62,39 +57,26 @@ export default function App() {
             <button className={claseBtn("/clientes")} onClick={() => ir("/clientes")}>
               👥 Clientes
             </button>
+            <button className={claseBtn("/marcas")} onClick={() => ir("/marcas")}>
+              🏷️ Marcas
+            </button>
             <button className={claseBtn("/ventas")} onClick={() => ir("/ventas")}>
               💰 Nueva Venta
             </button>
             <button className={claseBtn("/stock")} onClick={() => ir("/stock")}>
               📊 Reportes
             </button>
-
-            {usuario?.rol === "ADMIN" && (
-              <button className={claseBtn("/usuarios")} onClick={() => ir("/usuarios")}>
-                👤 Usuarios
-              </button>
-            )}
           </nav>
         </aside>
 
         <main className="content">
           <Routes>
             <Route path="/" element={<Navigate to="/ventas" replace />} />
-
             <Route path="/productos" element={<ProductosPage user={usuario} />} />
             <Route path="/clientes" element={<ClientesPage user={usuario} />} />
+            <Route path="/marcas" element={<MarcasPage user={usuario} />} />
             <Route path="/ventas" element={<NuevaVentaPage user={usuario} />} />
             <Route path="/stock" element={<StockBajoPage user={usuario} />} />
-
-            <Route
-              path="/usuarios"
-              element={
-                <RequireAdmin>
-                  <UsuariosPage user={usuario} />
-                </RequireAdmin>
-              }
-            />
-
             <Route path="*" element={<Navigate to="/ventas" replace />} />
           </Routes>
         </main>

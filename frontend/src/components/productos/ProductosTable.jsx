@@ -25,7 +25,7 @@ export default function ProductosTable({ productos, cargando, editar, eliminar }
                         <tr key={p.id}>
                             <td>{p.id}</td>
                             <td>{p.nombre}</td>
-                            <td>{p.marca || "-"}</td>
+                            <td>{p.marca?.nombre || "-"}</td>
                             <td>{p.categoria || "-"}</td>
                             <td>${p.precio}</td>
                             <td>{p.stock}</td>

@@ -1,8 +1,6 @@
 const express = require("express");
 const prisma = require("../prisma");
 
-const { requireAdmin } = require("../middlewares/auth.cjs");
-
 const router = express.Router();
 
 // GET /api/clientes  -> lista todos
@@ -72,7 +70,6 @@ router.put("/:id", async (req, res) => {
 
     res.json(actualizado);
   } catch (e) {
-    // P2025: registro no encontrado
     if (e?.code === "P2025") {
       return res.status(404).json({ error: "Cliente no encontrado" });
     }
@@ -83,21 +80,19 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE /api/clientes/:id -> borra
-router.delete("/:id", requireAdmin, async (req, res) => {
+router.delete("/:id", async (req, res) => {
   const id = Number(req.params.id);
 
   try {
     await prisma.cliente.delete({ where: { id } });
     res.status(204).send();
   } catch (e) {
-    // P2003: FK constraint (cliente con ventas)
     if (e?.code === "P2003") {
       return res.status(409).json({
         error: "No se puede eliminar este cliente porque tiene ventas asociadas.",
       });
     }
 
-    // P2025: no encontrado
     if (e?.code === "P2025") {
       return res.status(404).json({ error: "Cliente no encontrado" });
     }

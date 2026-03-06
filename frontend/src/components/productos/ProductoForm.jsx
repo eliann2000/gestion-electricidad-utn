@@ -1,4 +1,4 @@
-export default function ProductoForm({ idEditando, form, onChange, onSubmit, limpiar }) {
+export default function ProductoForm({ idEditando, form, onChange, onSubmit, limpiar, marcas }) {
     const editando = idEditando !== null;
 
     return (
@@ -37,7 +37,19 @@ export default function ProductoForm({ idEditando, form, onChange, onSubmit, lim
 
                     <div>
                         <label className="label">Marca</label>
-                        <input className="input" name="marca" value={form.marca} onChange={onChange} placeholder="Ej: Ferrolux" />
+                        <select
+                            className="select"
+                            name="marcaId"
+                            value={form.marcaId}
+                            onChange={onChange}
+                        >
+                            <option value="">Sin marca</option>
+                            {marcas.map((m) => (
+                                <option key={m.id} value={m.id}>
+                                    {m.nombre}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div>
