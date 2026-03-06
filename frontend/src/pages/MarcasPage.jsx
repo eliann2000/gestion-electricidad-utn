@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { marcasApi } from "../services/marcas";
 
 export default function MarcasPage() {
@@ -12,6 +12,7 @@ export default function MarcasPage() {
     const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
     const [error, setError] = useState("");
+    const [filtroNombre, setFiltroNombre] = useState("");
 
     async function cargarMarcas() {
         try {
@@ -100,6 +101,11 @@ export default function MarcasPage() {
         }
     }
 
+    const marcasFiltradas = useMemo(() => {
+        const f = filtroNombre.toLowerCase();
+        return marcas.filter((m) => (m.nombre || "").toLowerCase().includes(f));
+    }, [marcas, filtroNombre]);
+
     return (
         <div className="card">
             <div className="row" style={{ justifyContent: "space-between" }}>
@@ -183,8 +189,20 @@ export default function MarcasPage() {
                 {cargando && <small style={{ color: "var(--muted)" }}>Cargando...</small>}
             </div>
 
-            {!cargando && marcas.length === 0 ? (
-                <p className="mt12">No hay marcas cargadas.</p>
+            <div className="row mt12" style={{ gap: 12, flexWrap: "wrap" }}>
+                <div style={{ flex: "1 1 280px" }}>
+                    <label className="label">Buscar por nombre</label>
+                    <input
+                        className="input"
+                        value={filtroNombre}
+                        onChange={(e) => setFiltroNombre(e.target.value)}
+                        placeholder="Ej: philips"
+                    />
+                </div>
+            </div>
+
+            {!cargando && marcasFiltradas.length === 0 ? (
+                <p className="mt12">No hay marcas que coincidan con la búsqueda.</p>
             ) : (
                 <div className="tableWrap mt12">
                     <table className="table">
@@ -199,7 +217,7 @@ export default function MarcasPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {marcas.map((m) => (
+                            {marcasFiltradas.map((m) => (
                                 <tr key={m.id}>
                                     <td>{m.id}</td>
                                     <td>{m.nombre}</td>
