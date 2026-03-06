@@ -26,13 +26,17 @@ router.get("/:id", async (req, res) => {
 
 // POST /api/productos
 router.post("/", async (req, res) => {
-  const { nombre, marcaId, categoria, precio, stock, stockMinimo, activo } = req.body;
+  const { codigo, nombre, marcaId, precio, stock, stockMinimo, activo } = req.body;
+
+  if (!codigo || !codigo.trim()) {
+    return res.status(400).json({ error: "El código es obligatorio" });
+  }
 
   const nuevo = await prisma.producto.create({
     data: {
+      codigo,
       nombre,
       marcaId: marcaId ?? null,
-      categoria: categoria ?? null,
       precio,
       stock: stock ?? 0,
       stockMinimo: stockMinimo ?? 0,
@@ -47,12 +51,16 @@ router.post("/", async (req, res) => {
 // PUT /api/productos/:id
 router.put("/:id", async (req, res) => {
   const id = Number(req.params.id);
-  const { nombre, marcaId, categoria, precio, stock, stockMinimo, activo } = req.body;
+  const { codigo, nombre, marcaId, precio, stock, stockMinimo, activo } = req.body;
+
+  if (!codigo || !codigo.trim()) {
+    return res.status(400).json({ error: "El código es obligatorio" });
+  }
 
   try {
     const actualizado = await prisma.producto.update({
       where: { id },
-      data: { nombre, marcaId: marcaId ?? null, categoria, precio, stock, stockMinimo, activo },
+      data: { codigo, nombre, marcaId: marcaId ?? null, precio, stock, stockMinimo, activo },
       include: { marca: true },
     });
 

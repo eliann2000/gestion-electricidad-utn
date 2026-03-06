@@ -10,6 +10,17 @@ export default function ProductoForm({ idEditando, form, onChange, onSubmit, lim
             <form onSubmit={onSubmit}>
                 <div className="grid2">
                     <div>
+                        <label className="label">Código *</label>
+                        <input
+                            className="input"
+                            name="codigo"
+                            value={form.codigo}
+                            onChange={onChange}
+                            placeholder="Ej: LAM-001"
+                        />
+                    </div>
+
+                    <div>
                         <label className="label">Nombre *</label>
                         <input
                             className="input"
@@ -50,17 +61,6 @@ export default function ProductoForm({ idEditando, form, onChange, onSubmit, lim
                                 </option>
                             ))}
                         </select>
-                    </div>
-
-                    <div>
-                        <label className="label">Categoría</label>
-                        <input
-                            className="input"
-                            name="categoria"
-                            value={form.categoria}
-                            onChange={onChange}
-                            placeholder="Ej: Iluminación"
-                        />
                     </div>
 
                     <div>

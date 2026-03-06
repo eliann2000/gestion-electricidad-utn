@@ -6,9 +6,9 @@ import ProductoForm from "../components/productos/ProductoForm";
 import ProductosTable from "../components/productos/ProductosTable";
 
 const formVacio = {
+  codigo: "",
   nombre: "",
   marcaId: "",
-  categoria: "",
   precio: "",
   stock: "",
   stockMinimo: "",
@@ -24,8 +24,8 @@ export default function ProductosPage() {
   const [form, setForm] = useState(formVacio);
 
   const [filtroNombre, setFiltroNombre] = useState("");
-  const [filtroMarca, setFiltroMarca] = useState("");
-  const [filtroEstado, setFiltroEstado] = useState("todos"); // todos | activos | inactivos
+  const [filtroCodigo, setFiltroCodigo] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("activos");
 
   const [marcas, setMarcas] = useState([]);
 
@@ -70,15 +70,16 @@ export default function ProductosPage() {
     setError("");
 
     const body = {
+      codigo: form.codigo.trim(),
       nombre: form.nombre.trim(),
       marcaId: form.marcaId === "" ? null : Number(form.marcaId),
-      categoria: form.categoria.trim() || null,
       precio: Number(form.precio),
       stock: form.stock === "" ? 0 : Number(form.stock),
       stockMinimo: form.stockMinimo === "" ? 0 : Number(form.stockMinimo),
       activo: form.activo,
     };
 
+    if (!body.codigo) return setError("El código es obligatorio");
     if (!body.nombre) return setError("El nombre es obligatorio");
     if (!Number.isFinite(body.precio) || body.precio < 0) return setError("El precio debe ser 0 o mayor");
     if (!Number.isFinite(body.stock) || body.stock < 0) return setError("El stock debe ser 0 o mayor");
@@ -96,9 +97,9 @@ export default function ProductosPage() {
   const editar = (p) => {
     setIdEditando(p.id);
     setForm({
+      codigo: p.codigo || "",
       nombre: p.nombre || "",
       marcaId: p.marcaId ? String(p.marcaId) : "",
-      categoria: p.categoria || "",
       precio: String(p.precio ?? ""),
       stock: String(p.stock ?? 0),
       stockMinimo: String(p.stockMinimo ?? 0),
@@ -128,21 +129,21 @@ export default function ProductosPage() {
 
   const productosFiltrados = useMemo(() => {
     const n = filtroNombre.toLowerCase();
-    const m = filtroMarca.toLowerCase();
+    const c = filtroCodigo.toLowerCase();
 
     return productos.filter((p) => {
       const nom = (p.nombre || "").toLowerCase();
-      const mar = (p.marca?.nombre || "").toLowerCase();
+      const cod = (p.codigo || "").toLowerCase();
 
       const okNombre = nom.includes(n);
-      const okMarca = mar.includes(m);
+      const okCodigo = cod.includes(c);
 
       const okEstado =
         filtroEstado === "todos" ? true : filtroEstado === "activos" ? !!p.activo : !p.activo;
 
-      return okNombre && okMarca && okEstado;
+      return okNombre && okCodigo && okEstado;
     });
-  }, [productos, filtroNombre, filtroMarca, filtroEstado]);
+  }, [productos, filtroNombre, filtroCodigo, filtroEstado]);
 
   return (
     <div className="card">
@@ -177,13 +178,13 @@ export default function ProductosPage() {
 
       <div className="row mt12" style={{ gap: 12, flexWrap: "wrap" }}>
         <div style={{ flex: "1 1 240px" }}>
-          <label className="label">Buscar por nombre</label>
-          <input className="input" value={filtroNombre} onChange={(e) => setFiltroNombre(e.target.value)} />
+          <label className="label">Buscar por código</label>
+          <input className="input" value={filtroCodigo} onChange={(e) => setFiltroCodigo(e.target.value)} />
         </div>
 
         <div style={{ flex: "1 1 240px" }}>
-          <label className="label">Buscar por marca</label>
-          <input className="input" value={filtroMarca} onChange={(e) => setFiltroMarca(e.target.value)} />
+          <label className="label">Buscar por nombre</label>
+          <input className="input" value={filtroNombre} onChange={(e) => setFiltroNombre(e.target.value)} />
         </div>
 
         <div style={{ flex: "0 0 220px" }}>

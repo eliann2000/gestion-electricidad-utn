@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { clientesApi } from "../services/clientes";
 import { productosApi } from "../services/productos";
 import { ventasApi } from "../services/ventas";
+import { getToken } from "../auth";
 
 import CarritoTable from "../components/ventas/CarritoTable";
 
@@ -169,7 +170,10 @@ export default function NuevaVentaPage() {
 
         const resp = await fetch(`http://localhost:3001/api/ventas/${venta.id}/enviar-correo`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getToken()}`,
+          },
           body: JSON.stringify(to ? { to } : {}),
         });
 

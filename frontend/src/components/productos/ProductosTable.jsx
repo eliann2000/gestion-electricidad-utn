@@ -9,9 +9,9 @@ export default function ProductosTable({ productos, cargando, editar, eliminar }
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Código</th>
                         <th>Nombre</th>
                         <th>Marca</th>
-                        <th>Categoría</th>
                         <th>Precio</th>
                         <th>Stock</th>
                         <th>Mín</th>
@@ -24,9 +24,9 @@ export default function ProductosTable({ productos, cargando, editar, eliminar }
                     {productos.map((p) => (
                         <tr key={p.id}>
                             <td>{p.id}</td>
+                            <td>{p.codigo}</td>
                             <td>{p.nombre}</td>
                             <td>{p.marca?.nombre || "-"}</td>
-                            <td>{p.categoria || "-"}</td>
                             <td>${p.precio}</td>
                             <td>{p.stock}</td>
                             <td>{p.stockMinimo}</td>

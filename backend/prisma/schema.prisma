@@ -19,8 +19,8 @@ model Marca {
 
 model Producto {
   id          Int     @id @default(autoincrement())
+  codigo      String
   nombre      String
-  categoria   String?
   precio      Decimal @db.Decimal(10,2)
   stock       Int     @default(0)
   stockMinimo Int     @default(0)
