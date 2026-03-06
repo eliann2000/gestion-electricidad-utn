@@ -4,6 +4,7 @@ import { productosApi } from "../services/productos";
 import { ventasApi } from "../services/ventas";
 import { getToken } from "../auth";
 
+import AgregarProductoForm from "../components/ventas/AgregarProductoForm";
 import CarritoTable from "../components/ventas/CarritoTable";
 
 export default function NuevaVentaPage() {
@@ -237,42 +238,14 @@ export default function NuevaVentaPage() {
         </select>
       </div>
 
-      <div className="mt12 card cardFlat">
-        <h2 className="cardTitle">Agregar productos</h2>
-
-        <div className="grid2">
-          <div>
-            <label className="label">Producto</label>
-            <select className="select" value={productoId} onChange={(e) => setProductoId(e.target.value)}>
-              <option value="">Elegí producto</option>
-              {productos.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.id} - {p.nombre} (stock {p.stock}) - ${p.precio}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="label">Cantidad</label>
-            <input
-              className="input"
-              type="number"
-              min="1"
-              step="1"
-              value={cantidad}
-              onChange={(e) => setCantidad(e.target.value)}
-              placeholder="Ej: 1"
-            />
-          </div>
-        </div>
-
-        <div className="row mt12" style={{ justifyContent: "flex-end" }}>
-          <button className="btn btnPrimary" type="button" onClick={agregarItem}>
-            Agregar al carrito
-          </button>
-        </div>
-      </div>
+      <AgregarProductoForm
+        productos={productos}
+        productoId={productoId}
+        setProductoId={setProductoId}
+        cantidad={cantidad}
+        setCantidad={setCantidad}
+        agregarItem={agregarItem}
+      />
 
       {/* si CarritoTable usa otros nombres, después se ajusta */}
       <CarritoTable
