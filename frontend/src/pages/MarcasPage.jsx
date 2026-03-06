@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { marcasApi } from "../services/marcas";
+import MarcaForm from "../components/marcas/MarcaForm";
+import MarcasTable from "../components/marcas/MarcasTable";
 
 export default function MarcasPage() {
     const [marcas, setMarcas] = useState([]);
@@ -12,14 +14,15 @@ export default function MarcasPage() {
     const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
     const [error, setError] = useState("");
-    const [filtroNombre, setFiltroNombre] = useState("");
+    const [busqueda, setBusqueda] = useState("");
+    const [filtroEstado, setFiltroEstado] = useState("activas");
 
     async function cargarMarcas() {
         try {
             setCargando(true);
             setError("");
-            const data = await marcasApi.listar();
-            setMarcas(data);
+            const marcasTraidas = await marcasApi.listar();
+            setMarcas(marcasTraidas);
         } catch (e) {
             setError(e.message || "Error al cargar marcas");
         } finally {
@@ -48,20 +51,20 @@ export default function MarcasPage() {
             return;
         }
 
+        const marca = {
+            nombre: nombre.trim(),
+            descripcion: descripcion.trim() || null,
+            paginaWeb: paginaWeb.trim() || null,
+            activo,
+        };
+
         try {
             setGuardando(true);
 
-            const data = {
-                nombre: nombre.trim(),
-                descripcion: descripcion.trim() || null,
-                paginaWeb: paginaWeb.trim() || null,
-                activo,
-            };
-
             if (idEditando) {
-                await marcasApi.actualizar(idEditando, data);
+                await marcasApi.actualizar(idEditando, marca);
             } else {
-                await marcasApi.crear(data);
+                await marcasApi.crear(marca);
             }
 
             limpiar();
@@ -84,8 +87,8 @@ export default function MarcasPage() {
     }
 
     async function eliminar(id) {
-        const confirmar = window.confirm("¿Seguro que querés eliminar esta marca?");
-        if (!confirmar) return;
+        const ok = window.confirm("¿Seguro que querés eliminar esta marca?");
+        if (!ok) return;
 
         try {
             setError("");
@@ -101,10 +104,18 @@ export default function MarcasPage() {
         }
     }
 
-    const marcasFiltradas = useMemo(() => {
-        const f = filtroNombre.toLowerCase();
-        return marcas.filter((m) => (m.nombre || "").toLowerCase().includes(f));
-    }, [marcas, filtroNombre]);
+    const marcasFiltradas = marcas.filter((marca) => {
+        const coincideNombre = (marca.nombre || "").toLowerCase().includes(busqueda.toLowerCase());
+
+        const coincideEstado =
+            filtroEstado === "todas"
+                ? true
+                : filtroEstado === "activas"
+                    ? marca.activo
+                    : !marca.activo;
+
+        return coincideNombre && coincideEstado;
+    });
 
     return (
         <div className="card">
@@ -123,66 +134,20 @@ export default function MarcasPage() {
                 </div>
             )}
 
-            <div className="mt12 card cardFlat">
-                <h2 className="cardTitle">
-                    {idEditando ? `Editando marca ID ${idEditando}` : "Nueva marca"}
-                </h2>
-
-                <form onSubmit={guardar}>
-                    <div className="grid2">
-                        <div>
-                            <label className="label">Nombre *</label>
-                            <input
-                                className="input"
-                                value={nombre}
-                                onChange={(e) => setNombre(e.target.value)}
-                                placeholder="Ej: Philips"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="label">Página web</label>
-                            <input
-                                className="input"
-                                value={paginaWeb}
-                                onChange={(e) => setPaginaWeb(e.target.value)}
-                                placeholder="Ej: https://www.marca.com"
-                            />
-                        </div>
-
-                        <div style={{ gridColumn: "1 / -1" }}>
-                            <label className="label">Descripción</label>
-                            <input
-                                className="input"
-                                value={descripcion}
-                                onChange={(e) => setDescripcion(e.target.value)}
-                                placeholder="Ej: Marca de productos electrónicos"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="row mt12" style={{ justifyContent: "space-between" }}>
-                        <label className="checkboxRow">
-                            <input
-                                type="checkbox"
-                                checked={activo}
-                                onChange={(e) => setActivo(e.target.checked)}
-                            />
-                            Activa
-                        </label>
-
-                        <div className="row">
-                            <button className="btn btnPrimary" type="submit" disabled={guardando}>
-                                {guardando ? "Guardando..." : idEditando ? "Guardar cambios" : "Crear"}
-                            </button>
-
-                            <button className="btn btnNeutral" type="button" onClick={limpiar}>
-                                {idEditando ? "Cancelar" : "Limpiar"}
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
+            <MarcaForm
+                idEditando={idEditando}
+                nombre={nombre}
+                setNombre={setNombre}
+                paginaWeb={paginaWeb}
+                setPaginaWeb={setPaginaWeb}
+                descripcion={descripcion}
+                setDescripcion={setDescripcion}
+                activo={activo}
+                setActivo={setActivo}
+                guardar={guardar}
+                limpiar={limpiar}
+                guardando={guardando}
+            />
 
             <div className="row mt12" style={{ justifyContent: "space-between" }}>
                 <h2 className="m0">Listado</h2>
@@ -190,66 +155,36 @@ export default function MarcasPage() {
             </div>
 
             <div className="row mt12" style={{ gap: 12, flexWrap: "wrap" }}>
-                <div style={{ flex: "1 1 280px" }}>
+                <div style={{ flex: "1 1 240px" }}>
                     <label className="label">Buscar por nombre</label>
                     <input
                         className="input"
-                        value={filtroNombre}
-                        onChange={(e) => setFiltroNombre(e.target.value)}
+                        value={busqueda}
+                        onChange={(e) => setBusqueda(e.target.value)}
                         placeholder="Ej: philips"
                     />
                 </div>
+
+                <div style={{ flex: "0 0 220px" }}>
+                    <label className="label">Estado</label>
+                    <select
+                        className="select"
+                        value={filtroEstado}
+                        onChange={(e) => setFiltroEstado(e.target.value)}
+                    >
+                        <option value="activas">Activas</option>
+                        <option value="todas">Todas</option>
+                        <option value="inactivas">Inactivas</option>
+                    </select>
+                </div>
             </div>
 
-            {!cargando && marcasFiltradas.length === 0 ? (
-                <p className="mt12">No hay marcas que coincidan con la búsqueda.</p>
-            ) : (
-                <div className="tableWrap mt12">
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nombre</th>
-                                <th>Descripción</th>
-                                <th>Página web</th>
-                                <th>Activa</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {marcasFiltradas.map((m) => (
-                                <tr key={m.id}>
-                                    <td>{m.id}</td>
-                                    <td>{m.nombre}</td>
-                                    <td>{m.descripcion || "-"}</td>
-                                    <td>{m.paginaWeb || "-"}</td>
-                                    <td>{m.activo ? "Sí" : "No"}</td>
-                                    <td>
-                                        <div className="row">
-                                            <button className="btn btnPrimary btnSm" type="button" onClick={() => editar(m)}>
-                                                Editar
-                                            </button>
-                                            <button
-                                                className="btn btnDanger btnSm"
-                                                type="button"
-                                                onClick={() => eliminar(m.id)}
-                                            >
-                                                Eliminar
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-
-                            {cargando && (
-                                <tr>
-                                    <td colSpan="6">Cargando...</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+            <MarcasTable
+                marcas={marcasFiltradas}
+                cargando={cargando}
+                editar={editar}
+                eliminar={eliminar}
+            />
         </div>
     );
 }
