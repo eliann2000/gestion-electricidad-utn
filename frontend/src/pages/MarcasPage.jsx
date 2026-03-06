@@ -183,27 +183,23 @@ export default function MarcasPage() {
                 {cargando && <small style={{ color: "var(--muted)" }}>Cargando...</small>}
             </div>
 
-            <div className="tableWrap mt12">
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Descripción</th>
-                            <th>Página web</th>
-                            <th>Activa</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {!cargando && marcas.length === 0 ? (
+            {!cargando && marcas.length === 0 ? (
+                <p className="mt12">No hay marcas cargadas.</p>
+            ) : (
+                <div className="tableWrap mt12">
+                    <table className="table">
+                        <thead>
                             <tr>
-                                <td colSpan="6" style={{ textAlign: "center" }}>
-                                    No hay marcas cargadas.
-                                </td>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Página web</th>
+                                <th>Activa</th>
+                                <th>Acciones</th>
                             </tr>
-                        ) : (
-                            marcas.map((m) => (
+                        </thead>
+                        <tbody>
+                            {marcas.map((m) => (
                                 <tr key={m.id}>
                                     <td>{m.id}</td>
                                     <td>{m.nombre}</td>
@@ -212,11 +208,12 @@ export default function MarcasPage() {
                                     <td>{m.activo ? "Sí" : "No"}</td>
                                     <td>
                                         <div className="row">
-                                            <button className="btn btnPrimary btnSm" onClick={() => editar(m)}>
+                                            <button className="btn btnPrimary btnSm" type="button" onClick={() => editar(m)}>
                                                 Editar
                                             </button>
                                             <button
                                                 className="btn btnDanger btnSm"
+                                                type="button"
                                                 onClick={() => eliminar(m.id)}
                                             >
                                                 Eliminar
@@ -224,11 +221,17 @@ export default function MarcasPage() {
                                         </div>
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            ))}
+
+                            {cargando && (
+                                <tr>
+                                    <td colSpan="6">Cargando...</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 }
