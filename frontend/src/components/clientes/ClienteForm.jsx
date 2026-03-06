@@ -40,7 +40,9 @@ export default function ClienteForm({ idEditando, form, cambiar, guardar, limpia
                         onChange={cambiar}
                     />
 
-                    <Campo label="Dirección" name="direccion" placeholder="Ej: Córdoba" value={form.direccion} onChange={cambiar} />
+                    <Campo label="Dirección" name="direccion" placeholder="Ej: Córdoba 123" value={form.direccion} onChange={cambiar} />
+
+                    <Campo label="Localidad" name="localidad" placeholder="Ej: San Francisco" value={form.localidad} onChange={cambiar} />
                 </div>
 
                 <div className="row mt12" style={{ justifyContent: "flex-end" }}>

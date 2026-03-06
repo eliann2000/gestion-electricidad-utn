@@ -39,6 +39,7 @@ model Cliente {
   telefono  String
   email     String
   direccion String?
+  localidad String?
 
   ventas    Venta[]
 }

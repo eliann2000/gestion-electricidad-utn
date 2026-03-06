@@ -11,6 +11,7 @@ const formVacio = {
   telefono: "",
   email: "",
   direccion: "",
+  localidad: "",
 };
 
 export default function ClientesPage() {
@@ -56,6 +57,7 @@ export default function ClientesPage() {
     telefono: form.telefono.trim(),
     email: form.email.trim(),
     direccion: form.direccion.trim() || null,
+    localidad: form.localidad.trim() || null,
   });
 
   const validar = (b) => {
@@ -93,6 +95,7 @@ export default function ClientesPage() {
       telefono: c.telefono || "",
       email: c.email || "",
       direccion: c.direccion || "",
+      localidad: c.localidad || "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -139,7 +142,6 @@ export default function ClientesPage() {
         limpiar={limpiar}
       />
 
-      {/* ✅ AHORA va abajo */}
       <div className="row mt12" style={{ justifyContent: "space-between" }}>
         <h2 className="m0">Listado</h2>
         {cargando && <small style={{ color: "var(--muted)" }}>Cargando...</small>}

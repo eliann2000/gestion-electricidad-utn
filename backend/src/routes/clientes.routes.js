@@ -21,7 +21,7 @@ router.get("/:id", async (req, res) => {
 // POST /api/clientes -> crea uno
 router.post("/", async (req, res) => {
   try {
-    const { nombre, apellido, telefono, email, direccion } = req.body;
+    const { nombre, apellido, telefono, email, direccion, localidad } = req.body;
 
     if (!nombre?.trim()) return res.status(400).json({ error: "El nombre es obligatorio" });
     if (!apellido?.trim()) return res.status(400).json({ error: "El apellido es obligatorio" });
@@ -35,6 +35,7 @@ router.post("/", async (req, res) => {
         telefono: telefono.trim(),
         email: email.trim(),
         direccion: direccion?.trim() ? direccion.trim() : null,
+        localidad: localidad?.trim() ? localidad.trim() : null,
       },
     });
 
@@ -50,7 +51,7 @@ router.put("/:id", async (req, res) => {
   const id = Number(req.params.id);
 
   try {
-    const { nombre, apellido, telefono, email, direccion } = req.body;
+    const { nombre, apellido, telefono, email, direccion, localidad } = req.body;
 
     if (!nombre?.trim()) return res.status(400).json({ error: "El nombre es obligatorio" });
     if (!apellido?.trim()) return res.status(400).json({ error: "El apellido es obligatorio" });
@@ -65,6 +66,7 @@ router.put("/:id", async (req, res) => {
         telefono: telefono.trim(),
         email: email.trim(),
         direccion: direccion?.trim() ? direccion.trim() : null,
+        localidad: localidad?.trim() ? localidad.trim() : null,
       },
     });
 

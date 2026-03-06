@@ -13,6 +13,7 @@ export default function ClientesTable({ clientes, cargando, editar, eliminar }) 
                         <th>Teléfono</th>
                         <th>Email</th>
                         <th>Dirección</th>
+                        <th>Localidad</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -27,6 +28,7 @@ export default function ClientesTable({ clientes, cargando, editar, eliminar }) 
                             <td>{cli.telefono}</td>
                             <td>{cli.email}</td>
                             <td>{cli.direccion || "-"}</td>
+                            <td>{cli.localidad || "-"}</td>
                             <td>
                                 <div className="row">
                                     <button className="btn btnNeutral btnSm" type="button" onClick={() => editar(cli)}>
@@ -42,7 +44,7 @@ export default function ClientesTable({ clientes, cargando, editar, eliminar }) 
 
                     {cargando && (
                         <tr>
-                            <td colSpan="6">Cargando...</td>
+                            <td colSpan="7">Cargando...</td>
                         </tr>
                     )}
                 </tbody>

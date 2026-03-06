@@ -47,7 +47,7 @@ export default function StockBajoPage() {
 
       {!cargando && !error && lista.length === 0 && (
         <div className="alert alertOk mt12">
-          <b>OK:</b> No hay productos con stock mínimo.
+          No hay productos con stock mínimo.
         </div>
       )}
 
