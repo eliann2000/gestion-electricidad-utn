@@ -1,11 +1,11 @@
-const express = require("express");
-const prisma = require("../prisma");
+const express = require("express"); //importa el framework express para crear rutas y manejar peticiones HTTP
+const prisma = require("../prisma"); //importa el cliente de prisma para interactuar con la base de datos. prisma.producto.findMany() por ejemplo, devuelve todos los productos.
 
-const router = express.Router();
+const router = express.Router(); //crea un router de express, que es un conjunto de rutas relacionadas. En este caso, todas las rutas relacionadas con productos. Luego se exporta el router para usarlo en el servidor principal (index.js) con app.use("/api/productos", productosRouter);
 
 // GET /api/productos
 router.get("/", async (req, res) => {
-  const productos = await prisma.producto.findMany({
+  const productos = await prisma.producto.findMany({ //consulta la tabla productos de la base de datos y devuelve todos los productos. include: { marca: true } hace que también incluya los datos de la marca relacionada a cada producto.
     include: { marca: true },
     orderBy: { id: "desc" },
   });
@@ -83,12 +83,6 @@ router.delete("/:id", async (req, res) => {
     await prisma.producto.delete({ where: { id } });
     return res.status(204).send();
   } catch (e) {
-    if (e?.code === "P2003") {
-      return res.status(409).json({
-        error:
-          "No se puede eliminar este producto porque ya fue utilizado en una venta. Marcá el producto como Inactivo.",
-      });
-    }
 
     if (e?.code === "P2025") {
       return res.status(404).json({ error: "Producto no encontrado" });

@@ -48,10 +48,10 @@ export default function ClientesPage() {
 
   const onChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value })); //actualiza el formulario a medida que se escriben los datos, se asigna el valor del campo correspondiente al name del input que se está editando
   };
 
-  const armarBody = () => ({
+  const armarBody = () => ({ //se arma el body para enviar a la API, se recortan los espacios al principio y al final de cada campo, y se asigna null a los campos opcionales si quedan vacíos
     nombre: form.nombre.trim(),
     apellido: form.apellido.trim(),
     telefono: form.telefono.trim(),
@@ -68,7 +68,7 @@ export default function ClientesPage() {
     return "";
   };
 
-  const onSubmit = async (e) => {
+  const onSubmit = async (e) => { //e es el evento cuando se envia el formulario
     e.preventDefault();
     setError("");
 
@@ -110,12 +110,7 @@ export default function ClientesPage() {
       traerClientes();
       if (idEditando === c.id) limpiar();
     } catch (e) {
-      const msg = String(e?.message || "");
-      if (msg.includes("403") || msg.toLowerCase().includes("admin")) {
-        setError("No tenés permisos para eliminar clientes. Solo un ADMIN puede hacerlo.");
-      } else {
-        setError(msg);
-      }
+      setError(e.message);
     }
   };
 

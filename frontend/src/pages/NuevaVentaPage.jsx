@@ -166,7 +166,7 @@ export default function NuevaVentaPage() {
         let to;
         if (!clienteId) {
           to = window.prompt("Ingresá el email destino para enviar el comprobante:");
-          if (!to) throw new Error("No se envió el correo: no ingresaste email destino.");
+          if (!to) return;
         }
 
         const resp = await fetch(`http://localhost:3001/api/ventas/${venta.id}/enviar-correo`, {

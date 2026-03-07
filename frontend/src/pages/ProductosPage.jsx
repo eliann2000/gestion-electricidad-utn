@@ -58,21 +58,21 @@ export default function ProductosPage() {
   useEffect(() => {
     cargarProductos();
     cargarMarcas();
-  }, []);
+  }, []); //cuando se monta el componente, carga los productos y las marcas
 
-  const onChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+  const onChange = (e) => { //eventos de los inputs del formulario
+    const { name, value, type, checked } = e.target; //
+    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value })); //prev formulario anterior
   };
 
-  const guardar = async (e) => {
+  const guardar = async (e) => { //e es el evento cuando se envia el formulario
     e.preventDefault();
     setError("");
 
     const body = {
       codigo: form.codigo.trim(),
       nombre: form.nombre.trim(),
-      marcaId: form.marcaId === "" ? null : Number(form.marcaId),
+      marcaId: form.marcaId === "" ? null : Number(form.marcaId), //porque en general lo que viene del input viene como string
       precio: Number(form.precio),
       stock: form.stock === "" ? 0 : Number(form.stock),
       stockMinimo: form.stockMinimo === "" ? 0 : Number(form.stockMinimo),
@@ -94,7 +94,7 @@ export default function ProductosPage() {
     }
   };
 
-  const editar = (p) => {
+  const editar = (p) => { //p es el producto que se va a editar, se carga el formulario con los datos del producto
     setIdEditando(p.id);
     setForm({
       codigo: p.codigo || "",
@@ -108,20 +108,16 @@ export default function ProductosPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const eliminar = async (p) => {
+  const eliminar = async (p) => { //p es el producto que se va a eliminar
     if (!window.confirm(`¿Eliminar el producto "${p.nombre}"?`)) return;
 
     setError("");
     try {
       await productosApi.remove(p.id);
-      if (idEditando === p.id) limpiar();
+      if (idEditando === p.id) limpiar(); V //si el producto que se está editando es el mismo que se eliminó, se limpia el formulario
       cargarProductos();
     } catch (e) {
       const msg = String(e?.message || "");
-
-      if (msg.includes("P2003") || msg.toLowerCase().includes("foreign key") || msg.toLowerCase().includes("constraint")) {
-        return setError("No se puede eliminar este producto porque ya fue utilizado en una venta.");
-      }
 
       setError(msg || "Error al eliminar el producto");
     }
@@ -156,7 +152,7 @@ export default function ProductosPage() {
         </div>
       </div>
 
-      {error && (
+      {error && ( //si tiene texto viene el error
         <div className="alert alertError mt12">
           <b>Error:</b> {error}
         </div>
