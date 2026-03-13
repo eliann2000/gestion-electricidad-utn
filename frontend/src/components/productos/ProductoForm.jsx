@@ -7,7 +7,7 @@ export default function ProductoForm({ idEditando, form, onChange, onSubmit, lim
                 {editando ? `Editando producto ID ${idEditando}` : "Nuevo producto"}
             </h2>
 
-            <form onSubmit={onSubmit}> //submit es guardar, se ejecuta al hacer click en el botón de guardar o al presionar enter desde productoPage
+            <form onSubmit={onSubmit}> {/*Submit es guardar, se ejecuta al hacer click en el botón de guardar o al presionar enter desde productoPage*/}
                 <div className="grid2">
                     <div>
                         <label className="label">Código *</label>

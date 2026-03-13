@@ -21,7 +21,7 @@ export default function App() {
   const claseBtn = (r) => `sidebarBtn ${ruta === r ? "sidebarBtnActive" : ""}`;
 
   if (ruta === "/login") {
-    return <LoginPage onLogin={() => ir("/ventas", { replace: true })} />;
+    return <LoginPage onLogin={() => ir("/productos", { replace: true })} />;
   }
 
   return (
@@ -41,7 +41,10 @@ export default function App() {
                 <button
                   className="btn btnNeutral btnSm mt12"
                   type="button"
-                  onClick={() => (logout(), ir("/login", { replace: true }))}
+                  onClick={() => {
+                    logout();
+                    ir("/login", { replace: true });
+                  }}
                   style={{ width: "100%", justifyContent: "center" }}
                 >
                   Cerrar sesión

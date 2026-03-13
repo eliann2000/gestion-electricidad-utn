@@ -8,7 +8,7 @@ function Campo({ label, ...props }) {
 }
 
 export default function ClienteForm({ idEditando, form, cambiar, guardar, limpiar }) {
-    const editando = idEditando !== null;
+    const editando = idEditando !== null; //si hay id se edita si no se crea
     const titulo = editando ? `Editando cliente ID ${idEditando}` : "Nuevo cliente";
     const textoBtn = editando ? "Guardar cambios" : "Crear";
 

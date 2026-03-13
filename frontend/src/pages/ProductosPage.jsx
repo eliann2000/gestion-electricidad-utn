@@ -114,7 +114,7 @@ export default function ProductosPage() {
     setError("");
     try {
       await productosApi.remove(p.id);
-      if (idEditando === p.id) limpiar(); V //si el producto que se está editando es el mismo que se eliminó, se limpia el formulario
+      if (idEditando === p.id) limpiar(); //si el producto que se está editando es el mismo que se eliminó, se limpia el formulario
       cargarProductos();
     } catch (e) {
       const msg = String(e?.message || "");

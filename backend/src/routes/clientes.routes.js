@@ -89,11 +89,6 @@ router.delete("/:id", async (req, res) => {
     await prisma.cliente.delete({ where: { id } });
     res.status(204).send();
   } catch (e) {
-    if (e?.code === "P2003") {
-      return res.status(409).json({
-        error: "No se puede eliminar este cliente porque tiene ventas asociadas.",
-      });
-    }
 
     if (e?.code === "P2025") {
       return res.status(404).json({ error: "Cliente no encontrado" });
