@@ -20,8 +20,8 @@ export default function App() {
   const usuario = getUser();
   const claseBtn = (r) => `sidebarBtn ${ruta === r ? "sidebarBtnActive" : ""}`;
 
-  if (ruta === "/login") {
-    return <LoginPage onLogin={() => ir("/productos", { replace: true })} />;
+  if (ruta === "/login") { //Si la ruta es /login, muestra la página de login. Si el usuario ya tiene un token válido, el componente LoginPage se encargará de redirigirlo a /productos después de iniciar sesión correctamente. Si no, muestra el formulario de login para que pueda ingresar sus credenciales.
+    return <LoginPage onLogin={() => ir("/productos", { replace: true })} />; //El prop onLogin es una función que se pasa al componente LoginPage para que este pueda llamar a ir("/productos", { replace: true }) después de un login exitoso, lo que redirige al usuario a la página de productos. El replace: true es para que la navegación reemplace la entrada actual en el historial del navegador, evitando que el usuario pueda volver a la página de login con el botón de atrás después de iniciar sesión.
   }
 
   return (
@@ -32,7 +32,7 @@ export default function App() {
             <h2>⚡ Sistema</h2>
             <small>Gestión eléctrica</small>
 
-            {usuario && (
+            {usuario && ( //Si el usuario está autenticado (es decir, si getUser() devuelve un objeto de usuario válido), muestra su nombre de usuario y un botón para cerrar sesión. Al hacer clic en el botón de cerrar sesión, se llama a la función logout() para eliminar la sesión del usuario y luego se redirige a la página de login usando ir("/login", { replace: true }).
               <div style={{ marginTop: 10, color: "var(--muted)", fontSize: 12 }}>
                 <div>
                   Sesión: <b>{usuario.username}</b>
@@ -74,7 +74,7 @@ export default function App() {
 
         <main className="content">
           <Routes>
-            <Route path="/" element={<Navigate to="/ventas" replace />} />
+            <Route path="/" element={<Navigate to="/productos" replace />} />
             <Route path="/productos" element={<ProductosPage user={usuario} />} />
             <Route path="/clientes" element={<ClientesPage user={usuario} />} />
             <Route path="/marcas" element={<MarcasPage user={usuario} />} />

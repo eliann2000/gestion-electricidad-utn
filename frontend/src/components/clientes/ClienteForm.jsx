@@ -1,4 +1,4 @@
-function Campo({ label, ...props }) {
+function Campo({ label, ...props }) { //componente para renderizar un campo del formulario, recibe el label y las props del input (name, value, onChange, etc)
     return (
         <div>
             <label className="label">{label}</label>
@@ -16,7 +16,7 @@ export default function ClienteForm({ idEditando, form, cambiar, guardar, limpia
         <div className="mt12 card cardFlat">
             <h2 className="cardTitle">{titulo}</h2>
 
-            <form onSubmit={guardar}>
+            <form onSubmit={guardar}> {/*guardar es la función que se ejecuta al enviar el formulario, se encarga de crear o editar el cliente según corresponda*/}
                 <div className="grid2">
                     <Campo label="Nombre *" name="nombre" placeholder="Ej: Juan" value={form.nombre} onChange={cambiar} />
                     <Campo label="Apellido *" name="apellido" placeholder="Ej: Pérez" value={form.apellido} onChange={cambiar} />

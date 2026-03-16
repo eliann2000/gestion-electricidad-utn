@@ -15,7 +15,7 @@ const formVacio = {
 };
 
 export default function ClientesPage() {
-  const [clientes, setClientes] = useState([]);
+  const [clientes, setClientes] = useState([]); // se trae la lista de clientes desde el backend
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
 
@@ -117,7 +117,7 @@ export default function ClientesPage() {
   const clientesFiltrados = useMemo(() => {
     const f = filtro.toLowerCase();
     return clientes.filter((c) => `${c.nombre || ""} ${c.apellido || ""}`.toLowerCase().includes(f));
-  }, [clientes, filtro]);
+  }, [clientes, filtro]); //clientes y filtro son las dependencias, se vuelve a calcular clientesFiltrados cada vez que cambian clientes o filtro
 
   return (
     <div className="card">
@@ -129,7 +129,7 @@ export default function ClientesPage() {
         </div>
       )}
 
-      <ClienteForm
+      <ClienteForm //componente para el formulario de cliente, se le pasan las props necesarias para manejar el estado del formulario y las funciones de editar y limpiar 
         idEditando={idEditando}
         form={form}
         cambiar={onChange}

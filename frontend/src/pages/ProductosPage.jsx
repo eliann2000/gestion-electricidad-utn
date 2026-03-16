@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react"; //useEffect es un hook que se ejecuta cuando el componente se monta, se actualiza o se desmonta, se utiliza para cargar los productos y las marcas cuando se monta el componente
 import { productosApi } from "../services/productos";
 import { marcasApi } from "../services/marcas";
 
@@ -16,18 +16,18 @@ const formVacio = {
 };
 
 export default function ProductosPage() {
-  const [productos, setProductos] = useState([]);
+  const [productos, setProductos] = useState([]); // estado para almacenar la lista de productos
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
 
-  const [idEditando, setIdEditando] = useState(null);
+  const [idEditando, setIdEditando] = useState(null); // si es null se esta creando uno nuevo sino se esta editando el producto con ese id
   const [form, setForm] = useState(formVacio);
 
   const [filtroNombre, setFiltroNombre] = useState("");
   const [filtroCodigo, setFiltroCodigo] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("activos");
 
-  const [marcas, setMarcas] = useState([]);
+  const [marcas, setMarcas] = useState([]); // estado para almacenar la lista de marcas
 
   const limpiar = () => {
     setForm(formVacio);
@@ -61,8 +61,8 @@ export default function ProductosPage() {
   }, []); //cuando se monta el componente, carga los productos y las marcas
 
   const onChange = (e) => { //eventos de los inputs del formulario
-    const { name, value, type, checked } = e.target; //
-    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value })); //prev formulario anterior
+    const { name, value, type, checked } = e.target;
+    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value })); // si el input es checkbox, guarda true o false sino guarda el valor
   };
 
   const guardar = async (e) => { //e es el evento cuando se envia el formulario
@@ -127,7 +127,7 @@ export default function ProductosPage() {
     const n = filtroNombre.toLowerCase();
     const c = filtroCodigo.toLowerCase();
 
-    return productos.filter((p) => {
+    return productos.filter((p) => { // p es cada producto del array productos
       const nom = (p.nombre || "").toLowerCase();
       const cod = (p.codigo || "").toLowerCase();
 
@@ -152,7 +152,7 @@ export default function ProductosPage() {
         </div>
       </div>
 
-      {error && ( //si tiene texto viene el error
+      {error && ( //si error tiene texto viene el error
         <div className="alert alertError mt12">
           <b>Error:</b> {error}
         </div>

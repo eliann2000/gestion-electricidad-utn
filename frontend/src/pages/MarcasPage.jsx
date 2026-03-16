@@ -4,15 +4,20 @@ import MarcaForm from "../components/marcas/MarcaForm";
 import MarcasTable from "../components/marcas/MarcasTable";
 
 export default function MarcasPage() {
-    const [marcas, setMarcas] = useState([]);
+    const [marcas, setMarcas] = useState([]); // El estado marcas se utiliza para almacenar la lista de marcas que se obtiene del backend. Inicialmente es un array vacío, y se actualiza con los datos traídos mediante la función cargarMarcas.
+
+    // Lo que el usuario escribe en el formulario
+
     const [nombre, setNombre] = useState("");
     const [descripcion, setDescripcion] = useState("");
     const [paginaWeb, setPaginaWeb] = useState("");
     const [activo, setActivo] = useState(true);
 
+    // Estados para controlar la interfaz
+
     const [idEditando, setIdEditando] = useState(null);
     const [cargando, setCargando] = useState(true);
-    const [guardando, setGuardando] = useState(false);
+    const [guardando, setGuardando] = useState(false); // El estado guardando se utiliza para indicar si se está realizando una operación de guardado (creación o actualización) de una marca. Mientras guardando es true, se pueden deshabilitar los botones del formulario para evitar que el usuario realice múltiples envíos mientras la operación está en curso. Se establece en true al iniciar la operación de guardado y se vuelve a false al finalizar, ya sea con éxito o con error.
     const [error, setError] = useState("");
     const [busqueda, setBusqueda] = useState("");
     const [filtroEstado, setFiltroEstado] = useState("activas");
@@ -94,7 +99,7 @@ export default function MarcasPage() {
             setError("");
             await marcasApi.eliminar(id);
 
-            if (idEditando === id) {
+            if (idEditando === id) { // Si la marca que se acaba de eliminar es la misma que se está editando actualmente (es decir, si el usuario estaba editando una marca y luego decidió eliminarla), entonces se llama a la función limpiar() para restablecer el formulario a su estado inicial. Esto evita que el formulario muestre datos de una marca que ya no existe después de eliminarla.
                 limpiar();
             }
 
@@ -108,11 +113,11 @@ export default function MarcasPage() {
         const coincideNombre = (marca.nombre || "").toLowerCase().includes(busqueda.toLowerCase());
 
         const coincideEstado =
-            filtroEstado === "todas"
-                ? true
-                : filtroEstado === "activas"
-                    ? marca.activo
-                    : !marca.activo;
+            filtroEstado === "todas" // Si el filtro de estado es "todas", entonces coincideEstado es true para todas las marcas, sin importar su estado activo. Si el filtro es "activas", entonces coincideEstado es true solo para las marcas que tienen activo === true. Si el filtro es "inactivas", entonces coincideEstado es true solo para las marcas que tienen activo === false.
+                ? true // Si el filtro de estado es "todas", entonces coincideEstado es true para todas las marcas, sin importar su estado activo. Si el filtro es "activas", entonces coincideEstado es true solo para las marcas que tienen activo === true. Si el filtro es "inactivas", entonces coincideEstado es true solo para las marcas que tienen activo === false.
+                : filtroEstado === "activas" // Si el filtro de estado es "activas", entonces coincideEstado es true solo para las marcas que tienen activo === true. Si el filtro es "inactivas", entonces coincideEstado es true solo para las marcas que tienen activo === false.
+                    ? marca.activo // Si el filtro de estado es "activas", entonces coincideEstado es true solo para las marcas que tienen activo === true. Si el filtro es "inactivas", entonces coincideEstado es true solo para las marcas que tienen activo === false.
+                    : !marca.activo; // Si el filtro de estado es "inactivas", entonces coincideEstado es true solo para las marcas que tienen activo === false.
 
         return coincideNombre && coincideEstado;
     });

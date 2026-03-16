@@ -7,11 +7,11 @@ export default function LoginPage({ onLogin }) {
     const [cargando, setCargando] = useState(false);
     const [error, setError] = useState("");
 
-    const entrar = async (e) => {
+    const entrar = async (e) => { // e es el evento de submit del formulario. La función entrar se encarga de manejar el proceso de inicio de sesión, que incluye validar los datos ingresados, enviar la solicitud al backend, manejar la respuesta y guardar la sesión si el login es exitoso.
         e.preventDefault();
         setError("");
 
-        const u = usuario.trim();
+        const u = usuario.trim(); //trim elimina los espacios al principio y al final del string. Esto es para evitar que el usuario ingrese un nombre de usuario con espacios innecesarios, lo que podría causar problemas al momento de hacer login.
         if (!u || !clave) return setError("Completá usuario y contraseña");
 
         setCargando(true);
@@ -22,7 +22,7 @@ export default function LoginPage({ onLogin }) {
                 body: JSON.stringify({ username: u, password: clave }),
             });
 
-            const data = await res.json().catch(() => ({}));
+            const data = await res.json().catch(() => ({})); //intenta parsear la respuesta como JSON. Si la respuesta no es un JSON válido, se captura el error y se devuelve un objeto vacío en su lugar. Esto evita que la aplicación se rompa si el backend devuelve una respuesta inesperada o sin formato JSON, y permite manejar el error de manera más controlada.
             if (!res.ok) throw new Error(data.message || "Error al iniciar sesión");
 
             saveSession(data.token, data.user);

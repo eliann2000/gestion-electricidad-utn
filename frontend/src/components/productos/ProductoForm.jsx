@@ -1,5 +1,5 @@
 export default function ProductoForm({ idEditando, form, onChange, onSubmit, limpiar, marcas }) {
-    const editando = idEditando !== null;
+    const editando = idEditando !== null; //si idEditando es distinto de null, entonces se está editando un producto existente, sino se está creando uno nuevo
 
     return (
         <div className="mt12 card cardFlat">
@@ -55,7 +55,7 @@ export default function ProductoForm({ idEditando, form, onChange, onSubmit, lim
                             onChange={onChange}
                         >
                             <option value="">Sin marca</option>
-                            {marcas.map((m) => (
+                            {marcas.map((m) => ( // marcas es el array de marcas que se cargó desde productoPage, se itera para mostrar cada marca como opción del select
                                 <option key={m.id} value={m.id}>
                                     {m.nombre}
                                 </option>

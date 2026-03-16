@@ -93,4 +93,4 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = router; //exporta el router para usarlo en el servidor principal (index.js) con app.use("/api/productos", productosRouter);
