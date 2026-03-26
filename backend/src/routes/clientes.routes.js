@@ -3,13 +3,13 @@ const prisma = require("../prisma");
 
 const router = express.Router();
 
-// GET /api/clientes  -> lista todos
+// GET /api/clientes
 router.get("/", async (req, res) => {
   const clientes = await prisma.cliente.findMany({ orderBy: { id: "desc" } });
   res.json(clientes);
 });
 
-// GET /api/clientes/:id -> trae uno por id
+// GET /api/clientes/:id
 router.get("/:id", async (req, res) => {
   const id = Number(req.params.id);
   const cliente = await prisma.cliente.findUnique({ where: { id } });
@@ -18,7 +18,7 @@ router.get("/:id", async (req, res) => {
   res.json(cliente);
 });
 
-// POST /api/clientes -> crea uno
+// POST /api/clientes
 router.post("/", async (req, res) => {
   try {
     const { nombre, apellido, telefono, email, direccion, localidad } = req.body;
@@ -46,7 +46,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// PUT /api/clientes/:id -> actualiza
+// PUT /api/clientes/:id
 router.put("/:id", async (req, res) => {
   const id = Number(req.params.id);
 
@@ -81,7 +81,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE /api/clientes/:id -> borra
+// DELETE /api/clientes/:id
 router.delete("/:id", async (req, res) => {
   const id = Number(req.params.id);
 

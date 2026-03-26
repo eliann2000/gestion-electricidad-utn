@@ -1,11 +1,11 @@
-const express = require("express"); //importa el framework express para crear rutas y manejar peticiones HTTP
-const prisma = require("../prisma"); //importa el cliente de prisma para interactuar con la base de datos. prisma.producto.findMany() por ejemplo, devuelve todos los productos.
+const express = require("express");
+const prisma = require("../prisma");
 
-const router = express.Router(); //crea un router de express, que es un conjunto de rutas relacionadas. En este caso, todas las rutas relacionadas con productos. Luego se exporta el router para usarlo en el servidor principal (index.js) con app.use("/api/productos", productosRouter);
+const router = express.Router();
 
 // GET /api/productos
 router.get("/", async (req, res) => {
-  const productos = await prisma.producto.findMany({ //consulta la tabla productos de la base de datos y devuelve todos los productos. include: { marca: true } hace que también incluya los datos de la marca relacionada a cada producto.
+  const productos = await prisma.producto.findMany({
     include: { marca: true },
     orderBy: { id: "desc" },
   });
@@ -93,4 +93,4 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-module.exports = router; //exporta el router para usarlo en el servidor principal (index.js) con app.use("/api/productos", productosRouter);
+module.exports = router;

@@ -24,7 +24,7 @@ export default function MarcaForm({
                         <label className="label">Nombre *</label>
                         <input
                             className="input"
-                            value={nombre} // El valor del campo de nombre se controla mediante el estado nombre. Cada vez que el usuario escribe algo en el campo, se llama a setNombre para actualizar el estado con el nuevo valor. Esto permite que el formulario sea un componente controlado, donde el estado de React es la fuente de verdad para los valores de los campos del formulario.
+                            value={nombre}
                             onChange={(e) => setNombre(e.target.value)}
                             placeholder="Ej: Philips"
                         />
@@ -66,9 +66,11 @@ export default function MarcaForm({
                             {guardando ? "Guardando..." : idEditando ? "Guardar cambios" : "Crear"}
                         </button>
 
-                        <button className="btn btnNeutral" type="button" onClick={limpiar}>
-                            {idEditando ? "Cancelar" : "Limpiar"}
-                        </button>
+                        {idEditando && (
+                            <button className="btn btnNeutral" type="button" onClick={limpiar}>
+                                Cancelar
+                            </button>
+                        )}
                     </div>
                 </div>
             </form>

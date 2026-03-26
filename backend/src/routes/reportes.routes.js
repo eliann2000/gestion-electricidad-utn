@@ -8,7 +8,10 @@ router.get("/stock-bajo", async (req, res) => {
   const productos = await prisma.producto.findMany({
     where: {
       activo: true,
-      stock: { lte: prisma.producto.fields.stockMinimo }, // si esto te falla, te doy alternativa simple abajo
+      stock: { lte: prisma.producto.fields.stockMinimo }, // filtra los productos activos cuyo stock es menor o igual al stock mínimo definido para ese producto
+    },
+    include: {
+      marca: true,
     },
     orderBy: { stock: "asc" },
   });

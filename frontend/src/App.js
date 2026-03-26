@@ -10,7 +10,7 @@ import MarcasPage from "./pages/MarcasPage";
 import { getToken, getUser, logout } from "./auth";
 
 function RequireAuth({ children }) {
-  return getToken() ? children : <Navigate to="/login" replace />;
+  return getToken() ? children : <Navigate to="/login" replace />; // Si getToken() devuelve un token válido, renderiza los children
 }
 
 export default function App() {
@@ -20,8 +20,8 @@ export default function App() {
   const usuario = getUser();
   const claseBtn = (r) => `sidebarBtn ${ruta === r ? "sidebarBtnActive" : ""}`;
 
-  if (ruta === "/login") { //Si la ruta es /login, muestra la página de login. Si el usuario ya tiene un token válido, el componente LoginPage se encargará de redirigirlo a /productos después de iniciar sesión correctamente. Si no, muestra el formulario de login para que pueda ingresar sus credenciales.
-    return <LoginPage onLogin={() => ir("/productos", { replace: true })} />; //El prop onLogin es una función que se pasa al componente LoginPage para que este pueda llamar a ir("/productos", { replace: true }) después de un login exitoso, lo que redirige al usuario a la página de productos. El replace: true es para que la navegación reemplace la entrada actual en el historial del navegador, evitando que el usuario pueda volver a la página de login con el botón de atrás después de iniciar sesión.
+  if (ruta === "/login") {
+    return <LoginPage onLogin={() => ir("/productos", { replace: true })} />;
   }
 
   return (
@@ -29,10 +29,10 @@ export default function App() {
       <div className="layout">
         <aside className="sidebar">
           <div className="sidebarHeader">
-            <h2>⚡ Sistema</h2>
-            <small>Gestión eléctrica</small>
+            <h2>Sistema</h2>
+            <small>Gestión MogettaG</small>
 
-            {usuario && ( //Si el usuario está autenticado (es decir, si getUser() devuelve un objeto de usuario válido), muestra su nombre de usuario y un botón para cerrar sesión. Al hacer clic en el botón de cerrar sesión, se llama a la función logout() para eliminar la sesión del usuario y luego se redirige a la página de login usando ir("/login", { replace: true }).
+            {usuario && (
               <div style={{ marginTop: 10, color: "var(--muted)", fontSize: 12 }}>
                 <div>
                   Sesión: <b>{usuario.username}</b>
@@ -55,19 +55,19 @@ export default function App() {
 
           <nav className="sidebarNav">
             <button className={claseBtn("/productos")} onClick={() => ir("/productos")}>
-              📦 Productos
+              Productos
             </button>
             <button className={claseBtn("/clientes")} onClick={() => ir("/clientes")}>
-              👥 Clientes
+              Clientes
             </button>
             <button className={claseBtn("/marcas")} onClick={() => ir("/marcas")}>
-              🏷️ Marcas
+              Marcas
             </button>
             <button className={claseBtn("/ventas")} onClick={() => ir("/ventas")}>
-              💰 Nueva Venta
+              Nueva Venta
             </button>
             <button className={claseBtn("/stock")} onClick={() => ir("/stock")}>
-              📊 Reportes
+              Reportes
             </button>
           </nav>
         </aside>

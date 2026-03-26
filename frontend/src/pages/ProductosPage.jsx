@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"; //useEffect es un hook que se ejecuta cuando el componente se monta, se actualiza o se desmonta, se utiliza para cargar los productos y las marcas cuando se monta el componente
+import { useEffect, useMemo, useState } from "react";
 import { productosApi } from "../services/productos";
 import { marcasApi } from "../services/marcas";
 
@@ -16,7 +16,7 @@ const formVacio = {
 };
 
 export default function ProductosPage() {
-  const [productos, setProductos] = useState([]); // estado para almacenar la lista de productos
+  const [productos, setProductos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
 
@@ -27,7 +27,7 @@ export default function ProductosPage() {
   const [filtroCodigo, setFiltroCodigo] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("activos");
 
-  const [marcas, setMarcas] = useState([]); // estado para almacenar la lista de marcas
+  const [marcas, setMarcas] = useState([]);
 
   const limpiar = () => {
     setForm(formVacio);
@@ -58,21 +58,21 @@ export default function ProductosPage() {
   useEffect(() => {
     cargarProductos();
     cargarMarcas();
-  }, []); //cuando se monta el componente, carga los productos y las marcas
+  }, []);
 
-  const onChange = (e) => { //eventos de los inputs del formulario
+  const onChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value })); // si el input es checkbox, guarda true o false sino guarda el valor
+    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
 
-  const guardar = async (e) => { //e es el evento cuando se envia el formulario
+  const guardar = async (e) => {
     e.preventDefault();
     setError("");
 
     const body = {
       codigo: form.codigo.trim(),
       nombre: form.nombre.trim(),
-      marcaId: form.marcaId === "" ? null : Number(form.marcaId), //porque en general lo que viene del input viene como string
+      marcaId: form.marcaId === "" ? null : Number(form.marcaId),
       precio: Number(form.precio),
       stock: form.stock === "" ? 0 : Number(form.stock),
       stockMinimo: form.stockMinimo === "" ? 0 : Number(form.stockMinimo),
@@ -94,7 +94,7 @@ export default function ProductosPage() {
     }
   };
 
-  const editar = (p) => { //p es el producto que se va a editar, se carga el formulario con los datos del producto
+  const editar = (p) => {
     setIdEditando(p.id);
     setForm({
       codigo: p.codigo || "",
@@ -108,13 +108,13 @@ export default function ProductosPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const eliminar = async (p) => { //p es el producto que se va a eliminar
+  const eliminar = async (p) => {
     if (!window.confirm(`¿Eliminar el producto "${p.nombre}"?`)) return;
 
     setError("");
     try {
       await productosApi.remove(p.id);
-      if (idEditando === p.id) limpiar(); //si el producto que se está editando es el mismo que se eliminó, se limpia el formulario
+      if (idEditando === p.id) limpiar();
       cargarProductos();
     } catch (e) {
       const msg = String(e?.message || "");
@@ -127,7 +127,7 @@ export default function ProductosPage() {
     const n = filtroNombre.toLowerCase();
     const c = filtroCodigo.toLowerCase();
 
-    return productos.filter((p) => { // p es cada producto del array productos
+    return productos.filter((p) => {
       const nom = (p.nombre || "").toLowerCase();
       const cod = (p.codigo || "").toLowerCase();
 
@@ -152,7 +152,7 @@ export default function ProductosPage() {
         </div>
       </div>
 
-      {error && ( //si error tiene texto viene el error
+      {error && (
         <div className="alert alertError mt12">
           <b>Error:</b> {error}
         </div>

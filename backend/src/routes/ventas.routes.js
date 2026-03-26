@@ -6,12 +6,11 @@ const router = express.Router();
 
 /**
  * GET /api/ventas
- * Lista ventas (sin detalles, solo resumen)
  */
 router.get("/", async (req, res) => {
   const ventas = await prisma.venta.findMany({
     orderBy: { id: "desc" },
-    include: { cliente: true }, // para ver el cliente si existe
+    include: { cliente: true },
   });
 
   res.json(ventas);
@@ -19,7 +18,6 @@ router.get("/", async (req, res) => {
 
 /**
  * GET /api/ventas/:id
- * Trae una venta con sus detalles y productos
  */
 router.get("/:id", async (req, res) => {
   const id = Number(req.params.id);
@@ -40,22 +38,15 @@ router.get("/:id", async (req, res) => {
 
 /**
  * POST /api/ventas
- * Crea una venta completa:
- * - valida stock
- * - calcula total
- * - crea venta + detalles
- * - descuenta stock
- * TODO en una transacción
  */
 router.post("/", async (req, res) => {
   const { clienteId, items } = req.body;
 
-  // Validaciones simples (MVP)
+  // Validaciones
   if (!Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ message: "items debe ser un array con al menos un item" });
   }
 
-  // Normalizamos clienteId (puede ser null)
   const clienteIdNumber = clienteId ? Number(clienteId) : null;
 
   try {
@@ -98,12 +89,12 @@ router.post("/", async (req, res) => {
         return {
           productoId,
           cantidad,
-          precioUnitario, // Prisma Decimal lo acepta como number
+          precioUnitario,
           subtotal,
         };
       });
 
-      // 4) Crear Venta (total provisional 0, luego update)
+      // 4) Crear Venta
       const venta = await tx.venta.create({
         data: {
           clienteId: clienteIdNumber,
@@ -111,7 +102,7 @@ router.post("/", async (req, res) => {
         },
       });
 
-      // 5) Crear DetalleVenta (asociados a la venta)
+      // 5) Crear DetalleVenta
       await tx.detalleVenta.createMany({
         data: detallesData.map((d) => ({
           ventaId: venta.id,
@@ -138,7 +129,7 @@ router.post("/", async (req, res) => {
         data: { total },
       });
 
-      // 8) Devolver venta completa (opcional: con detalles)
+      // 8) Devolver venta completa
       const ventaCompleta = await tx.venta.findUnique({
         where: { id: ventaFinal.id },
         include: {
@@ -157,16 +148,12 @@ router.post("/", async (req, res) => {
 
     res.status(201).json(resultado);
   } catch (err) {
-    // Errores típicos: stock insuficiente, cantidad inválida, etc.
     res.status(400).json({ message: err.message || "Error creando venta" });
   }
 });
 
 /**
  * POST /api/ventas/:id/enviar-correo
- * Envía el comprobante de una venta por email
- * - Usa cliente.email si existe
- * - O acepta { "to": "destino@gmail.com" } en body
  */
 router.post("/:id/enviar-correo", async (req, res) => {
   const id = Number(req.params.id);

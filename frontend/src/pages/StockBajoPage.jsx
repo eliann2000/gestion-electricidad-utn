@@ -64,7 +64,6 @@ export default function StockBajoPage() {
                   <th>ID</th>
                   <th>Nombre</th>
                   <th>Marca</th>
-                  <th>Categoría</th>
                   <th>Stock</th>
                   <th>Mínimo</th>
                 </tr>
@@ -74,8 +73,7 @@ export default function StockBajoPage() {
                   <tr key={p.id}>
                     <td>{p.id}</td>
                     <td>{p.nombre}</td>
-                    <td>{p.marca || "-"}</td>
-                    <td>{p.categoria || "-"}</td>
+                    <td>{p.marca?.nombre || "-"}</td>
                     <td>{p.stock}</td>
                     <td>{p.stockMinimo}</td>
                   </tr>

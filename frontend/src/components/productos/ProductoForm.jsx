@@ -7,7 +7,7 @@ export default function ProductoForm({ idEditando, form, onChange, onSubmit, lim
                 {editando ? `Editando producto ID ${idEditando}` : "Nuevo producto"}
             </h2>
 
-            <form onSubmit={onSubmit}> {/*Submit es guardar, se ejecuta al hacer click en el botón de guardar o al presionar enter desde productoPage*/}
+            <form onSubmit={onSubmit}>
                 <div className="grid2">
                     <div>
                         <label className="label">Código *</label>
@@ -55,7 +55,7 @@ export default function ProductoForm({ idEditando, form, onChange, onSubmit, lim
                             onChange={onChange}
                         >
                             <option value="">Sin marca</option>
-                            {marcas.map((m) => ( // marcas es el array de marcas que se cargó desde productoPage, se itera para mostrar cada marca como opción del select
+                            {marcas.map((m) => (
                                 <option key={m.id} value={m.id}>
                                     {m.nombre}
                                 </option>

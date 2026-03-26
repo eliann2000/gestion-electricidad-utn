@@ -15,7 +15,7 @@ const formVacio = {
 };
 
 export default function ClientesPage() {
-  const [clientes, setClientes] = useState([]); // se trae la lista de clientes desde el backend
+  const [clientes, setClientes] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
 
@@ -48,10 +48,10 @@ export default function ClientesPage() {
 
   const onChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value })); //actualiza el formulario a medida que se escriben los datos, se asigna el valor del campo correspondiente al name del input que se está editando
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const armarBody = () => ({ //se arma el body para enviar a la API, se recortan los espacios al principio y al final de cada campo, y se asigna null a los campos opcionales si quedan vacíos
+  const armarBody = () => ({
     nombre: form.nombre.trim(),
     apellido: form.apellido.trim(),
     telefono: form.telefono.trim(),
@@ -68,7 +68,7 @@ export default function ClientesPage() {
     return "";
   };
 
-  const onSubmit = async (e) => { //e es el evento cuando se envia el formulario
+  const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -117,7 +117,7 @@ export default function ClientesPage() {
   const clientesFiltrados = useMemo(() => {
     const f = filtro.toLowerCase();
     return clientes.filter((c) => `${c.nombre || ""} ${c.apellido || ""}`.toLowerCase().includes(f));
-  }, [clientes, filtro]); //clientes y filtro son las dependencias, se vuelve a calcular clientesFiltrados cada vez que cambian clientes o filtro
+  }, [clientes, filtro]);
 
   return (
     <div className="card">
@@ -129,7 +129,7 @@ export default function ClientesPage() {
         </div>
       )}
 
-      <ClienteForm //componente para el formulario de cliente, se le pasan las props necesarias para manejar el estado del formulario y las funciones de editar y limpiar 
+      <ClienteForm
         idEditando={idEditando}
         form={form}
         cambiar={onChange}
